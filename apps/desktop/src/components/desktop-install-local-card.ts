@@ -1,5 +1,5 @@
 /** Presentation for an install offer or an already-selected local runtime. */
-export type LocalCardState = 'none' | 'installed' | 'bundled'
+export type LocalCardState = 'none' | 'installed' | 'bundled' | 'remote-only'
 
 export interface LocalCardPresentation {
   /** i18n key into `t.install` for the card title. */
@@ -8,6 +8,10 @@ export interface LocalCardPresentation {
   desc: 'installLocalDesc' | 'useLocalDesc' | 'bundledLocalDesc'
   /** Whether the "Will install to <root>" footer is accurate for this state. */
   showInstallTo: boolean
+  /** CORTA CUSTOMIZATION: whether a local card is offered at all (false for the remote-only Light client). */
+  offered: boolean
+  /** i18n key into `t.install` for the setup-choice subtitle. */
+  subtitle: 'setupChoiceDesc' | 'setupChoiceDescLocal' | 'remoteSetupDesc'
 }
 
 export function localCardPresentation(local: LocalCardState | undefined): LocalCardPresentation {
@@ -16,14 +20,27 @@ export function localCardPresentation(local: LocalCardState | undefined): LocalC
       return {
         title: 'useLocalTitle',
         desc: 'useLocalDesc',
-        showInstallTo: false
+        showInstallTo: false,
+        offered: true,
+        subtitle: 'setupChoiceDescLocal'
       }
 
     case 'bundled':
       return {
         title: 'useLocalTitle',
         desc: 'bundledLocalDesc',
-        showInstallTo: false
+        showInstallTo: false,
+        offered: true,
+        subtitle: 'setupChoiceDescLocal'
+      }
+
+    case 'remote-only':
+      return {
+        title: 'installLocalTitle',
+        desc: 'installLocalDesc',
+        showInstallTo: false,
+        offered: false,
+        subtitle: 'remoteSetupDesc'
       }
 
     case 'none':
@@ -32,7 +49,9 @@ export function localCardPresentation(local: LocalCardState | undefined): LocalC
       return {
         title: 'installLocalTitle',
         desc: 'installLocalDesc',
-        showInstallTo: true
+        showInstallTo: true,
+        offered: true,
+        subtitle: 'setupChoiceDesc'
       }
   }
 }

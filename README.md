@@ -1,243 +1,228 @@
-<p align="center">
-  <img src="assets/banner.png" alt="Hermes Agent" width="100%">
-</p>
+# Corta — Hermes Agent Distribution
 
-# Hermes Agent ☤
-<p align="center">
-  <a href="https://hermes-agent.nousresearch.com/">Hermes Agent</a> | <a href="https://hermes-agent.nousresearch.com/">Hermes Desktop</a>
-</p>
-<p align="center">
-  <a href="https://hermes-agent.nousresearch.com/docs/"><img src="https://img.shields.io/badge/Docs-hermes--agent.nousresearch.com-FFD700?style=for-the-badge" alt="Documentation"></a>
-  <a href="https://discord.gg/NousResearch"><img src="https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="Discord"></a>
-  <a href="https://github.com/NousResearch/hermes-agent/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License: MIT"></a>
-  <a href="https://nousresearch.com"><img src="https://img.shields.io/badge/Built%20by-Nous%20Research-blueviolet?style=for-the-badge" alt="Built by Nous Research"></a>
-  <a href="README.zh-CN.md"><img src="https://img.shields.io/badge/Lang-中文-red?style=for-the-badge" alt="中文"></a>
-  <a href="README.ur-pk.md"><img src="https://img.shields.io/badge/Lang-اردو-green?style=for-the-badge" alt="اردو"></a>
-  <a href="README.es.md"><img src="https://img.shields.io/badge/Lang-Español-orange?style=for-the-badge" alt="Español"></a>
-</p>
-
-**The self-improving AI agent built by [Nous Research](https://nousresearch.com).** It's the only agent with a built-in learning loop — it creates skills from experience, improves them during use, nudges itself to persist knowledge, searches its own past conversations, and builds a deepening model of who you are across sessions. Run it on a $5 VPS, a GPU cluster, or serverless infrastructure that costs nearly nothing when idle. It's not tied to your laptop — talk to it from Telegram while it works on a cloud VM.
-
-Use any model you want — [Nous Portal](https://portal.nousresearch.com), OpenRouter, OpenAI, your own endpoint, and [many others](https://hermes-agent.nousresearch.com/docs/integrations/providers). Switch with `hermes model` — no code changes, no lock-in.
-
-<table>
-<tr><td><b>A real terminal interface</b></td><td>Full TUI with multiline editing, slash-command autocomplete, conversation history, interrupt-and-redirect, and streaming tool output.</td></tr>
-<tr><td><b>Lives where you do</b></td><td>Telegram, Discord, Slack, WhatsApp, Signal, and CLI — all from a single gateway process. Voice memo transcription, cross-platform conversation continuity.</td></tr>
-<tr><td><b>A closed learning loop</b></td><td>Agent-curated memory with periodic nudges. Autonomous skill creation after complex tasks. Skills self-improve during use. FTS5 session search with LLM summarization for cross-session recall. <a href="https://github.com/plastic-labs/honcho">Honcho</a> dialectic user modeling. Compatible with the <a href="https://agentskills.io">agentskills.io</a> open standard.</td></tr>
-<tr><td><b>Scheduled automations</b></td><td>Built-in cron scheduler with delivery to any platform. Daily reports, nightly backups, weekly audits — all in natural language, running unattended.</td></tr>
-<tr><td><b>Delegates and parallelizes</b></td><td>Spawn isolated subagents for parallel workstreams. In Desktop, choose their provider, model, and limits under Settings → Model → Subagents, then Apply the complete route. Write Python scripts that call tools via RPC, collapsing multi-step pipelines into zero-context-cost turns.</td></tr>
-<tr><td><b>Runs anywhere, not just your laptop</b></td><td>Six built-in terminal backends — local, Docker, SSH, Modal, Daytona, and Vercel Sandbox — plus plugin backends such as Singularity/Apptainer. Daytona and Modal offer serverless persistence — your agent's environment hibernates when idle and wakes on demand, costing nearly nothing between sessions. Run it on a $5 VPS or a GPU cluster.</td></tr>
-<tr><td><b>Research-ready</b></td><td>Batch trajectory generation, trajectory compression for training the next generation of tool-calling models.</td></tr>
-</table>
+> **This is not the official Hermes Agent repository.**
+> It is Corta's maintained fork of [NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent).
+> Hermes Agent is designed and developed by [Nous Research](https://nousresearch.com) and released under the MIT License.
+> For Hermes Agent itself (features, documentation, support, community) go to the upstream project:
+> https://github.com/NousResearch/hermes-agent · https://hermes-agent.nousresearch.com/docs/
 
 ---
 
-## Quick Install
+## 1. About this repository
 
-### Linux, macOS, WSL2
+Corta is a commercial distribution of **Hermes Agent** for professional firms.
 
-```bash
-curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash
+- **Hermes Agent is the engine.** The agent core, the gateway, tools, memory, skills, the CLI and
+  the Desktop application are developed upstream by Nous Research. Corta does not rewrite them.
+- **Corta is the product.** Corta adds a visual identity, a Desktop packaging of its own, a
+  distribution channel it controls (`updates.corta.fr`), and the operational tooling to ship it to
+  clients.
+- **This repository is a fork kept close to upstream.** Corta's changes are concentrated in a
+  small number of clearly marked places (branding, Desktop packaging, distribution, docs). Upstream
+  changes are merged regularly with a reproducible procedure (section 4).
+
+Fork point at the time of writing: upstream commit `67fc279c` (upstream release line `v0.23.1`).
+Run `corta/scripts/sync-upstream.sh --report` to see where the fork stands today.
+
+## 2. Architecture
+
+```
+ Firm's premises                                         Users' computers (macOS / Windows)
+┌───────────────────────────────────────────────┐       ┌──────────────────────────────────┐
+│ Corta Server  (Ubuntu Server)                 │       │ Corta Desktop (Remote)           │
+│                                               │ HTTPS │  = Hermes Desktop, "light"       │
+│  Hermes Agent ── gateway (`hermes serve`) ◄───┼───────┤    variant, Corta brand          │
+│      │                                        │  WS   │  - no local agent, no Python     │
+│      ├── local LLM (runs on the server)       │       │  - connects to the server's      │
+│      └── firm files: server disks / NAS       │       │    gateway (token or sign-in)    │
+└───────────────────────────────────────────────┘       └──────────────────────────────────┘
 ```
 
-### Windows (native, PowerShell)
+| Component | Role | Origin |
+|---|---|---|
+| **Hermes Agent** | Agent engine: sessions, tools, memory, skills, scheduled jobs, model calls. | Upstream, unmodified. |
+| **Corta Server** | An Ubuntu server at the firm running Hermes Agent and its gateway. | Upstream Hermes install + Corta operations. |
+| **Gateway** | The server's HTTP/WebSocket endpoint (`hermes serve`) the Desktop connects to. Authenticates with a session token or OAuth. | Upstream. |
+| **Local LLM** | The model runs on the server, configured as a Hermes provider/endpoint. Nothing runs on users' computers. | Upstream provider configuration. |
+| **Storage / NAS** | The firm's files are reached by the agent from the server (local disks or mounted NAS). They never need to live on the users' computers. | Server configuration. |
+| **Corta Desktop** | The client users install. It is the upstream Hermes Desktop built as the **light** (remote-only) variant under the Corta brand. | Upstream app + Corta brand layer. |
 
-> **Heads up:** Native Windows runs Hermes without WSL — CLI, gateway, TUI, and tools all work natively. If you'd rather use WSL2, the Linux/macOS one-liner above works there too. Found a bug? Please [file issues](https://github.com/NousResearch/hermes-agent/issues).
+Corta Desktop is a **remote client**: it carries no agent runtime, needs no Python and no model on
+the workstation, and does not install one. On first launch it only offers to connect to a gateway
+(see the upstream guide
+[Connecting to a remote backend](https://hermes-agent.nousresearch.com/docs/user-guide/desktop#connecting-to-a-remote-backend)).
+A gateway URL can be preset for managed deployments with `HERMES_DESKTOP_REMOTE_URL`.
 
-Run this in PowerShell:
+## 3. What's different from upstream?
 
-```powershell
-iex (irm https://hermes-agent.nousresearch.com/install.ps1)
+Every Corta change in an upstream file is marked `CORTA CUSTOMIZATION`. Corta-only files live in
+`corta/`, `apps/desktop/branding/`, `apps/desktop/src/branding/` and one workflow.
+
+| Area | Change | Where |
+|---|---|---|
+| **Branding** | A brand layer selected at build time (`HERMES_DESKTOP_BRAND=corta`). Unset, every build is byte-for-byte upstream Hermes. | `apps/desktop/branding/brands.cjs` |
+| Branding | Product name "Corta" in window titles, native menus, About panel, tray, notifications, quit dialog and all bundled UI copy (9 locales); "Hermes Agent" (engine) and "Hermes Cloud" (a Nous service) are kept where they are true. | `src/branding/copy.ts`, `electron/brand-name.ts`, `branding/vite-brand.mjs` |
+| Branding | The Hermes/Nous brand mark is not shown. Corta's mark, icons and installer artwork are **not supplied yet**; a release gate blocks client installers until they are. | `corta/docs/BRAND_ASSETS.md`, `corta/scripts/check-brand-assets.mjs` |
+| **Theme** | A native "Corta" preset in the Hermes theme system (light + dark, all surfaces, terminal palettes), default on every new install; the alternative built-in presets and server-pushed CLI skins are not offered. Its colour values are a neutral upstream palette until Corta's tokens are supplied. | `src/branding/corta-theme.ts`, `src/branding/themes.ts` |
+| **Packaging** | Corta OS identity: `fr.corta.desktop`, product "Corta", own userData directory, own MSIX identity/publisher, no Nous artwork, metadata/copyright with Nous Research attribution. Store packaging refused (no Corta Store identity). | `branding/brands.cjs`, `product-identity.cjs`, `electron-builder.config.cjs` |
+| **Desktop configuration** | The light variant is strictly remote-only: it never adopts a Hermes install found on the computer and never offers or starts a local install. | `electron/main.ts`, `electron/bootstrap-needed-backend.ts`, `electron/first-run-setup-gate.ts`, `src/components/desktop-install-local-card.ts` |
+| **Distribution** | Updates come from `https://updates.corta.fr`, never from Nous Research's feeds or GitHub releases. Corta build scripts (`dist:corta:*`). | `branding/brands.cjs`, `apps/desktop/package.json`, `corta/docs/RELEASE.md` |
+| **Upstream sync** | Sync script, merge rules for Corta-owned files, a scheduled GitHub Action that prepares (never publishes) sync branches. | `corta/scripts/sync-upstream.sh`, `.gitattributes`, `.github/workflows/corta-upstream-sync.yml` |
+| Corta-specific features | None yet. | — |
+
+The full list of upstream files Corta touches, and why, is in
+[`corta/docs/UPSTREAM_SYNC.md`](corta/docs/UPSTREAM_SYNC.md#touchpoints).
+
+## 4. Upstream synchronization
+
+Remotes and branches:
+
+| Remote | URL | Branch |
+|---|---|---|
+| `origin` | `https://github.com/Corta-Pampa/hermes-agent` | `main` (Corta) |
+| `upstream` | `https://github.com/NousResearch/hermes-agent.git` | `main` |
+
+Check the remotes, and add `upstream` if it is missing (never rewrite an existing one):
+
+```sh
+git remote -v
+git remote add upstream https://github.com/NousResearch/hermes-agent.git   # only if absent
+git config merge.ours.driver true                                        # once per clone (see below)
 ```
 
-The source installer delegates Python 3.14, Node.js, npm, pnpm, ripgrep, FFmpeg,
-and Python dependencies to PM. If Git is absent, it stages the verified Git
-for Windows archive in Hermes' tool store. It does not replace your system Git.
-See [installation methods](https://hermes-agent.nousresearch.com/docs/getting-started/installation)
-for the separate MSIX/App Installer package and its update ownership.
+Recommended: the scripted procedure, which works on a dedicated branch and never pushes:
 
-> **Android / Termux:** A signed APT repository is available for aarch64 devices, with a `stable` channel (tagged releases) and a prerelease `canary` channel. The package includes Python, Node.js, and the TUI. Use the [Termux guide](https://hermes-agent.nousresearch.com/docs/getting-started/termux), not the desktop/server installer script.
->
-> **Windows:** Native Windows is fully supported — the PowerShell one-liner above installs everything. If you'd rather use WSL2, the Linux command works there too. Native Windows install lives under `%LOCALAPPDATA%\hermes`; WSL2 installs under `~/.hermes` as on Linux.
-
-After installation:
-
-```bash
-source ~/.bashrc    # reload shell (or: source ~/.zshrc)
-hermes              # start chatting!
+```sh
+corta/scripts/sync-upstream.sh --report   # what upstream has that Corta does not
+corta/scripts/sync-upstream.sh            # creates corta/sync/upstream-<date> and merges into it
 ```
 
-### Troubleshooting
+The equivalent manual commands:
 
-#### Windows Defender or antivirus flags `uv.exe` as malware
-
-If your antivirus (Bitdefender, Windows Defender, etc.) quarantines `uv.exe` from the Hermes `bin` folder (`%LOCALAPPDATA%\hermes\bin\uv.exe`), this is a **false positive**. The file is Astral's `uv` — the Rust Python package manager Hermes bundles to manage its Python environment. ML-based antivirus engines commonly flag unsigned Rust binaries that download and install packages.
-
-**To verify your copy is authentic:**
-
-```powershell
-# Install GitHub CLI if needed
-winget install --id GitHub.cli
-
-# Login to GitHub
-gh auth login
-
-# Run verification
-$uv = "$env:LOCALAPPDATA\hermes\bin\uv.exe"
-$ver = (& $uv --version).Split(' ')[1]
-[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-$zip = "$env:TEMP\uv.zip"
-Invoke-WebRequest "https://github.com/astral-sh/uv/releases/download/$ver/uv-x86_64-pc-windows-msvc.zip" -OutFile $zip -UseBasicParsing
-gh attestation verify $zip --repo astral-sh/uv
-Expand-Archive $zip "$env:TEMP\uv_x" -Force
-(Get-FileHash "$env:TEMP\uv_x\uv.exe").Hash -eq (Get-FileHash $uv).Hash
+```sh
+git fetch upstream
+git checkout main
+git pull origin main
+git checkout -b corta/sync/upstream-$(date -u +%Y%m%d)
+git merge --no-ff upstream/main
 ```
 
-If attestation says "Verification succeeded" and the last line prints `True`, you're good.
+Compare the two lines of history:
 
-**To whitelist Hermes:**
-- **Windows Defender:** Run PowerShell as Admin → `Add-MpPreference -ExclusionPath "$env:LOCALAPPDATA\hermes\bin"`
-- **Bitdefender:** Add an exception in the Bitdefender console (Protection > Antivirus > Settings > Manage Exceptions)
-- Whitelist the **folder**, not the file hash — Hermes updates `uv` and the hash changes every version
-
-For more context, see the upstream Astral reports: [astral-sh/uv#13553](https://github.com/astral-sh/uv/issues/13553), [astral-sh/uv#15011](https://github.com/astral-sh/uv/issues/15011), [astral-sh/uv#10079](https://github.com/astral-sh/uv/issues/10079).
-
----
-
-## Getting Started
-
-```bash
-hermes              # Interactive CLI — start a conversation
-hermes model        # Choose your LLM provider and model
-hermes tools        # Configure which tools are enabled
-hermes config set   # Set individual config values
-hermes config get   # Print individual config values
-hermes gateway      # Start the messaging gateway (Telegram, Discord, etc.)
-hermes setup        # Run the full setup wizard (configures everything at once)
-hermes update       # Update to the latest version
-hermes doctor       # Diagnose any issues
+```sh
+git log --oneline upstream/main..main      # Corta's own commits (customizations, merges)
+git log --oneline main..upstream/main      # upstream commits Corta has not merged yet
+git diff upstream/main...main              # everything Corta changes relative to upstream
+git diff --stat upstream/main...main       # the same, as a file list
 ```
 
-📖 **[Full documentation →](https://hermes-agent.nousresearch.com/docs/)**
+Three kinds of commits:
 
----
+- **Upstream commits merged in** — arrive through `git merge upstream/main`; never edit them.
+- **Corta customizations** — commits on `main` that are not upstream (`upstream/main..main`). They
+  live in the places listed in section 3 and survive merges as long as conflicts are resolved by
+  keeping the Corta intent.
+- **Commits to re-apply** — a Corta change in an upstream file that upstream rewrote. Git reports it
+  as a conflict; re-apply the Corta change on top of upstream's new code (never drop either side
+  silently).
 
-## Skip the API-key collection — Nous Portal
+**Conflicts.** The script stops with the merge in progress and flags conflicted files that are Corta
+touchpoints. Resolve each by keeping upstream's new behaviour *and* re-applying the
+`CORTA CUSTOMIZATION` hunk. `README.md` and Corta-replaced icon files use the `ours` merge driver
+(`.gitattributes`), so they keep Corta's version only when both sides changed them. Never resolve a
+conflict by deleting a Corta customization or by discarding upstream's change wholesale.
 
-Hermes works with whatever provider you want — that's not changing. But if you'd rather not collect five separate API keys for the model, web search, image generation, TTS, and a cloud browser, **[Nous Portal](https://portal.nousresearch.com)** covers all of them under one subscription:
+**Test, then push the sync branch and open a PR into `main`:**
 
-- **300+ models** — pick any of them with `/model <name>`
-- **Tool Gateway** — web search, image generation (FAL), text-to-speech (OpenAI), cloud browser (Browser Use), all routed through your sub. No extra accounts.
-
-One command from a fresh install:
-
-```bash
-hermes setup --portal
+```sh
+cd apps/desktop
+NODE_OPTIONS=--max-old-space-size=8192 pnpm run typecheck && pnpm run lint
+pnpm exec vitest run --project ui
+pnpm exec vitest run --project electron electron/product-identity-brand.test.ts electron/product-identity.test.ts
+pnpm run build:corta
+cd ../.. && git push -u origin corta/sync/upstream-<date>
 ```
 
-That logs you in via OAuth, sets Nous as your provider, and turns on the Tool Gateway. Check what's wired up any time with `hermes portal info`. Full details on the [Tool Gateway docs page](https://hermes-agent.nousresearch.com/docs/user-guide/features/tool-gateway).
+No force push, no history rewrite. The detailed procedure, the touchpoint list and the automated
+workflow are in [`corta/docs/UPSTREAM_SYNC.md`](corta/docs/UPSTREAM_SYNC.md).
 
-You can still bring your own keys per-tool whenever you want — the gateway is per-backend, not all-or-nothing.
+## 5. Build Corta Desktop
 
----
+Prerequisites (pinned by `pm/lock.json`, provisioned by `./activate`): Node 26, pnpm 12, git.
+macOS installers are built on macOS (Xcode CLT; Xcode 26 for the macOS 26 icon), Windows MSIX on
+Windows 11 with the Windows SDK. Signing is optional for local builds.
 
-## CLI vs Messaging Quick Reference
+```sh
+source ./activate                          # PM-managed Node/pnpm (use an isolated HERMES_HOME for dev)
+pnpm install --frozen-lockfile             # at the repository root
 
-Hermes has two entry points: start the terminal UI with `hermes`, or run the gateway and talk to it from Telegram, Discord, Slack, WhatsApp, Signal, or Email. Once you're in a conversation, many slash commands are shared across both interfaces.
-
-| Action                         | CLI                                           | Messaging platforms                                                              |
-| ------------------------------ | --------------------------------------------- | -------------------------------------------------------------------------------- |
-| Start chatting                 | `hermes`                                      | Run `hermes gateway setup` + `hermes gateway start`, then send the bot a message |
-| Start fresh conversation       | `/new` or `/reset`                            | `/new` or `/reset`                                                               |
-| Change model                   | `/model [provider:model]`                     | `/model [provider:model]`                                                        |
-| Set a personality              | `/personality [name]`                         | `/personality [name]`                                                            |
-| Retry or undo the last turn    | `/retry`, `/undo`                             | `/retry`, `/undo`                                                                |
-| Compress context / check usage | `/compress`, `/usage`, `/insights [--days N]` | `/compress`, `/usage`, `/insights [days]`                                        |
-| Browse skills                  | `/skills` or `/<skill-name>`                  | `/<skill-name>`                                                                  |
-| Interrupt current work         | `Ctrl+C` or send a new message                | `/stop` or send a new message                                                    |
-| Platform-specific status       | `/platforms`                                  | `/status`, `/sethome`                                                            |
-
-For the full command lists, see the [CLI guide](https://hermes-agent.nousresearch.com/docs/user-guide/cli) and the [Messaging Gateway guide](https://hermes-agent.nousresearch.com/docs/user-guide/messaging).
-
----
-
-## Documentation
-
-All documentation lives at **[hermes-agent.nousresearch.com/docs](https://hermes-agent.nousresearch.com/docs/)**:
-
-| Section                                                                                             | What's Covered                                             |
-| --------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
-| [Quickstart](https://hermes-agent.nousresearch.com/docs/getting-started/quickstart)                 | Install → setup → first conversation in 2 minutes          |
-| [CLI Usage](https://hermes-agent.nousresearch.com/docs/user-guide/cli)                              | Commands, keybindings, personalities, sessions             |
-| [Configuration](https://hermes-agent.nousresearch.com/docs/user-guide/configuration)                | Config file, providers, models, all options                |
-| [Messaging Gateway](https://hermes-agent.nousresearch.com/docs/user-guide/messaging)                | Telegram, Discord, Slack, WhatsApp, Signal, Home Assistant |
-| [Security](https://hermes-agent.nousresearch.com/docs/user-guide/security)                          | Command approval, DM pairing, container isolation          |
-| [Tools & Toolsets](https://hermes-agent.nousresearch.com/docs/user-guide/features/tools)            | 40+ tools, toolset system, terminal backends               |
-| [Skills System](https://hermes-agent.nousresearch.com/docs/user-guide/features/skills)              | Procedural memory, Skills Hub, creating skills             |
-| [Memory](https://hermes-agent.nousresearch.com/docs/user-guide/features/memory)                     | Persistent memory, user profiles, best practices           |
-| [MCP Integration](https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp)               | Connect any MCP server for extended capabilities           |
-| [Cron Scheduling](https://hermes-agent.nousresearch.com/docs/user-guide/features/cron)              | Scheduled tasks with platform delivery                     |
-| [Context Files](https://hermes-agent.nousresearch.com/docs/user-guide/features/context-files)       | Project context that shapes every conversation             |
-| [Architecture](https://hermes-agent.nousresearch.com/docs/developer-guide/architecture)             | Project structure, agent loop, key classes                 |
-| [Contributing](https://hermes-agent.nousresearch.com/docs/developer-guide/contributing)             | Development setup, PR process, code style                  |
-| [CLI Reference](https://hermes-agent.nousresearch.com/docs/reference/cli-commands)                  | All commands and flags                                     |
-| [Environment Variables](https://hermes-agent.nousresearch.com/docs/reference/environment-variables) | Complete env var reference                                 |
-
----
-
-## Migrating from OpenClaw or another agent
-
-If you're coming from OpenClaw, Claude Code, Codex CLI or Cursor, Hermes can import your settings, memories and skills (and, for OpenClaw, API keys when you ask for them).
-
-**During setup:** `hermes setup` asks whether to import from another agent, pre-selects the ones it finds (`~/.openclaw`, `~/.claude`, `~/.codex`, `~/.cursor`), installs the official `agent-importers` plugin and runs the import with a preview first.
-
-**Anytime after install:**
-
-```bash
-hermes plugins install agent-importers          # once per profile
-hermes import-agent openclaw                    # interactive migration (full preset)
-hermes import-agent openclaw --dry-run          # preview what would be migrated
-hermes import-agent openclaw --migrate-secrets  # also bring allowlisted API keys
-hermes import-agent claude-code                 # or codex / cursor
+cd apps/desktop
+pnpm run dev:corta                         # run Corta Desktop Remote from source
+pnpm run build:corta                       # renderer + main bundles, Corta brand, light variant
+pnpm run pack:corta                        # unpacked app in release/ (no installer, no publish)
+pnpm run corta:check-brand                 # release gate: fails while Hermes/Nous artwork is shipped
+pnpm run dist:corta:mac                    # DMG + ZIP   (macOS host)
+pnpm run dist:corta:win                    # MSIX        (Windows host)
+pnpm run dist:corta:linux                  # AppImage/deb/rpm (internal use)
 ```
 
-What gets imported from OpenClaw:
+Variants (`HERMES_DESKTOP_VARIANT`) remain the upstream ones and can all be built under either
+brand (`HERMES_DESKTOP_BRAND=hermes|corta`):
 
-- **SOUL.md** — persona file
-- **Memories** — MEMORY.md and USER.md entries
-- **Skills** — user-created skills → `~/.hermes/skills/openclaw-imports/`
-- **Command allowlist** — approval patterns
-- **Messaging settings** — platform configs, allowed users, working directory
-- **API keys** — allowlisted secrets (Telegram, OpenRouter, OpenAI, Anthropic, ElevenLabs), only with `--migrate-secrets`
-- **TTS assets** — workspace audio files
-- **Workspace instructions** — AGENTS.md (with `--workspace-target`)
+| Variant | Corta product | Local runtime | Corta use |
+|---|---|---|---|
+| `light` | **Corta** (`fr.corta.desktop`) | none — remote only | **The commercial product** |
+| *(empty)* | Corta Local (`fr.corta.desktop-local`) | bootstraps a local Hermes | internal only |
+| `bundled` | Corta Agent (`fr.corta.desktop-agent`) | embedded Python payload | internal only |
+| `store` | refused under the Corta brand | — | — |
 
-`hermes claw migrate` still works as the older spelling. See the [OpenClaw migration guide](https://hermes-agent.nousresearch.com/docs/guides/migrate-from-openclaw) and [Import from Other Agents](https://hermes-agent.nousresearch.com/docs/user-guide/import-from-other-agents).
+`dist:corta:*` refuses to run while the brand gate fails; `CORTA_ALLOW_PLACEHOLDER_ASSETS=1` lets an
+**internal** test build through. Details: [`corta/docs/RELEASE.md`](corta/docs/RELEASE.md).
 
----
+## 6. Release process
 
-## Contributing
+1. Merge the upstream sync you want to ship into `main` (section 4) and pin it: the Desktop and the
+   firm's server must run Hermes from the **same upstream merge commit** (the Desktop checks the
+   server's backend contract and warns on skew in either direction).
+2. Tag the Corta release in Corta's own namespace, e.g. `corta-v1.2.0` (never `v*`, which is
+   upstream's), and build on macOS and Windows with
+   `HERMES_PAYLOAD_TAG=v1.2.0 HERMES_RELEASE_EPOCH=<tag time>` so the app carries the version.
+3. Sign (Apple Developer ID + notarization; Windows code-signing certificate whose subject is
+   `CORTA_MSIX_PUBLISHER`). No secret or certificate is configured in this repository.
+4. Test the installers on clean machines against a staging Corta Server.
+5. Upload to `updates.corta.fr` under the layout in `corta/docs/RELEASE.md` — beta channel first,
+   then stable. Keep previous versions online for rollback.
 
-We welcome contributions! See the [Contributing Guide](https://hermes-agent.nousresearch.com/docs/developer-guide/contributing) for development setup, code style, and PR process.
+Nothing in this repository publishes automatically. The GitHub Action only prepares sync branches.
 
-Start with the [PM developer workflow](website/docs/reference/package-management.md#developer-workflow)
-for activation, daily use, dependency changes, and leaving the environment.
-[Development Setup](CONTRIBUTING.md#development-setup) covers the separate test environment and verification commands.
+## 7. License and attribution
 
----
+This project is based on **Hermes Agent** by **Nous Research**, distributed under the
+[MIT License](LICENSE) (`Copyright (c) 2025 Nous Research`). The license and copyright notices in
+this repository, including those of bundled components (e.g. `apps/desktop/src/plugins/hermes-bots/LICENSE`),
+are kept as-is and must ship with every distribution. Corta's About panel states that the product
+is built on Hermes Agent, © Nous Research (MIT).
 
-## Community
+Corta is not the author of the Hermes Agent engine. "Hermes", "Hermes Agent", "Hermes Cloud" and
+"Nous Research" are names of Nous Research's projects and services; Corta is not affiliated with or
+endorsed by Nous Research. The licence under which Corta publishes its own changes is Corta's
+decision; whatever it is, the upstream code keeps its MIT notice. `README.es.md`, `README.zh-CN.md`
+and `README.ur-pk.md` are upstream's translated Hermes READMEs, kept unchanged.
 
-- 💬 [Discord](https://discord.gg/NousResearch)
-- 📚 [Skills Hub](https://agentskills.io)
-- 🐛 [Issues](https://github.com/NousResearch/hermes-agent/issues)
-- 🔌 [computer-use-linux](https://github.com/avifenesh/computer-use-linux) — Linux desktop-control MCP server for Hermes and other MCP hosts, with AT-SPI accessibility trees, Wayland/X11 input, screenshots, and compositor window targeting.
-- 🔌 [HermesClaw](https://github.com/AaronWong1999/hermesclaw) — Community WeChat bridge: Run Hermes Agent and OpenClaw on the same WeChat account.
+## 8. Development
 
----
-
-## License
-
-MIT — see [LICENSE](LICENSE).
-
-Built by [Nous Research](https://nousresearch.com).
+- Start with [`AGENTS.md`](AGENTS.md) (upstream's engineering guide, applies to this fork too) and
+  `apps/desktop/AGENTS.md`.
+- Corta-specific documentation is in [`corta/`](corta/README.md): audit, branding, brand assets to
+  supply, upstream sync, release and updates, user-data migration, risks and remaining work.
+- Where Corta customizations live:
+  - `apps/desktop/branding/` — brand manifests (names, IDs, publisher, update origin, renderer brand).
+  - `apps/desktop/src/branding/` — Corta theme preset and tokens, copy rewriting, theme policy.
+  - `corta/` — scripts and documentation; `.github/workflows/corta-upstream-sync.yml`.
+  - `grep -rn "CORTA CUSTOMIZATION"` — every hook in an upstream file.
+- Rules for Corta changes: prefer the brand layer and upstream extension points; touch an upstream
+  file only when no seam exists, keep the hunk small and marked; never change the agent engine for
+  branding; add a behaviour test for every hook (see `src/branding/*.test.ts`,
+  `electron/product-identity-brand.test.ts`).
+- Fixes that are not Corta-specific (e.g. the light variant's remote-only behaviour) are good
+  candidates to propose upstream, which shrinks the fork.

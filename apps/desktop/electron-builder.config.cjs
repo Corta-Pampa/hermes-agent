@@ -28,6 +28,9 @@ const {
   msixAppIdWithOrg,
   token
 } = require('./product-identity.cjs')
+// CORTA CUSTOMIZATION: brand-owned packaging values (publisher, installer
+// chrome, update origin). HERMES_DESKTOP_BRAND unset = upstream values.
+const brand = require('./branding/brands.cjs').activeBrand()
 
 // `storeMsix` is optional on the identity type but guaranteed present when
 // `store` is true (product-identity.cjs spreads it only in that branch).
@@ -67,7 +70,10 @@ if (!/^\d+\.\d+\.\d+$/.test(electronVersion)) {
 }
 
 const macFeed = channelRequest ? null : feedContract.darwinFeed(channel === 'canary' || channel === 'light-canary' ? 'canary' : 'stable', light)
-const publicUrl = feedContract.feedBaseUrl(process.env.CLOUDFLARE_R2_PUBLIC_URL)
+// CORTA CUSTOMIZATION: a brand with its own update origin publishes there
+// unless CI overrides it; such a brand never falls back to GitHub releases.
+const publicUrl = feedContract.feedBaseUrl(process.env.CLOUDFLARE_R2_PUBLIC_URL || brand.updates.feedBaseUrl || undefined)
+const outOfStorePublisher = brand.msixPublisher || OUT_OF_STORE_PUBLISHER
 
 /** @satisfies {Configuration} */
 module.exports = {
@@ -93,7 +99,7 @@ module.exports = {
   // var (local, or a fork without the R2 vars) keep the github provider, which
   // is exactly today's behavior. The store build has no feed at all (the Store
   // owns its distribution and updates).
-  publish: channelRequest ? null : !channel
+  publish: channelRequest ? null : !channel || (!publicUrl && !brand.updates.allowGithubFallback)
     ? null
     : [
         publicUrl
@@ -105,9 +111,15 @@ module.exports = {
     // Electron bootstrap reads package.productName before main.ts. Keep the
     // shipped stable default, but isolate nonstable userData from first access.
     // A stable-branded channel has no token and keeps stable's userData.
-    ...((channelRequest && token) || appNamePascal !== artifactNamePascal ? { productName: displayName } : {}),
-    desktopName: appId
+    ...((channelRequest && token) || appNamePascal !== artifactNamePascal || brand.id !== 'hermes' ? { productName: displayName } : {}),
+    desktopName: appId,
+    // CORTA CUSTOMIZATION: package metadata a rebranded build shows the OS
+    // (Windows CompanyName, MSIX description, Linux vendor).
+    ...(brand.id !== 'hermes'
+      ? { author: brand.publisherDisplayName, description: light ? brand.linux.lightSynopsis : brand.linux.synopsis }
+      : {})
   },
+  ...(brand.id !== 'hermes' ? { copyright: brand.copyright } : {}),
   directories: {
     output: 'release'
   },
@@ -160,7 +172,7 @@ module.exports = {
       : publicUrl && channel && macFeed
       ? [{ provider: 'generic', url: `${publicUrl}/${macFeed.directory}/`, channel: macFeed.channel }]
       : null,
-    category: 'public.app-category.developer-tools',
+    category: brand.macCategory,
     extendInfo: {
       CFBundleDisplayName: displayName,
       CFBundleExecutable: displayName,
@@ -204,14 +216,14 @@ module.exports = {
     // drive-with-the-girl artwork instead (dmgbuild's badge option can only
     // paste onto the stock removable-drive icon). It lives in packaging/ with
     // the background so the `files` whitelist keeps it out of the app bundle.
-    icon: 'packaging/dmg-volume.icns',
-    title: 'Hermes Agent Installer',
+    ...(brand.dmg.icon ? { icon: brand.dmg.icon } : {}),
+    title: brand.dmg.title ?? `${displayName} Installer`,
     // A prebuilt .tiff on purpose, not a PNG plus a @2x sibling: dmg-builder's
     // PNG path runs `tiffutil -cathidpicheck`, which on macOS 26 rewrites both
     // frames to 72 dpi and silently drops the 2x representation. A .tiff is
     // handed to dmgbuild untouched (dmg-builder/dist/dmgUtil.js), and living
     // outside assets/ keeps it out of the app bundle via the `files` whitelist.
-    background: 'packaging/nous-dmg-2b.tiff',
+    ...(brand.dmg.background ? { background: brand.dmg.background } : {}),
     iconSize: 96,
     iconTextSize: 11,
     window: {
@@ -249,8 +261,8 @@ module.exports = {
     identityName: store ? mustStoreMsix(storeMsixWhenStore).identityName : msixAppIdWithOrg,
     applicationId: appNamePascal,
     displayName,
-    publisher: store ? mustStoreMsix(storeMsixWhenStore).publisher : OUT_OF_STORE_PUBLISHER,
-    publisherDisplayName: store ? mustStoreMsix(storeMsixWhenStore).publisherDisplayName : 'Nous Research',
+    publisher: store ? mustStoreMsix(storeMsixWhenStore).publisher : outOfStorePublisher,
+    publisherDisplayName: store ? mustStoreMsix(storeMsixWhenStore).publisherDisplayName : brand.publisherDisplayName,
     // The native quad is the build time (scripts/msix-shared.mjs::nativeQuad),
     // baked into the manifest template, so the builder's own build-number
     // override would stamp a second, conflicting version.
@@ -280,10 +292,8 @@ module.exports = {
   },
   linux: {
     category: 'Development',
-    maintainer: 'Nous Research <support@nousresearch.com>',
-    synopsis: light
-      ? 'Remote-only desktop client for Hermes Agent.'
-      : 'Native desktop shell for Hermes Agent.',
+    maintainer: brand.linux.maintainer,
+    synopsis: light ? brand.linux.lightSynopsis : brand.linux.synopsis,
     target: ['AppImage']
   }
 }

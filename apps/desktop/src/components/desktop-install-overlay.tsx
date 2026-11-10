@@ -452,13 +452,11 @@ export function DesktopInstallOverlay({ enabled = true }: DesktopInstallOverlayP
             <BrandMark className="size-11 shrink-0" />
             <div className="min-w-0">
               <h2 className="text-xl font-semibold tracking-tight">{copy.setupChoiceTitle}</h2>
-              <p className="mt-1.5 text-sm text-muted-foreground">
-                {localState === 'none' ? copy.setupChoiceDesc : copy.setupChoiceDescLocal}
-              </p>
+              <p className="mt-1.5 text-sm text-muted-foreground">{copy[localPres.subtitle]}</p>
             </div>
           </div>
 
-          <div className="mt-6 grid gap-3 sm:grid-cols-2">
+          <div className={localPres.offered ? 'mt-6 grid gap-3 sm:grid-cols-2' : 'mt-6 grid gap-3'}>
             <button
               className="rounded-lg border border-(--ui-stroke-tertiary) bg-(--ui-bg-quinary) p-4 text-left transition hover:bg-(--chrome-action-hover)"
               onClick={() => setRemoteOpen(true)}
@@ -474,6 +472,7 @@ export function DesktopInstallOverlay({ enabled = true }: DesktopInstallOverlayP
             <button
               className="rounded-lg border border-(--ui-stroke-tertiary) bg-(--ui-bg-quinary) p-4 text-left transition hover:bg-(--chrome-action-hover) disabled:cursor-not-allowed disabled:opacity-60"
               disabled={localStarting}
+              hidden={!localPres.offered}
               onClick={async () => {
                 setLocalStart({ root: activeRoot, starting: true, error: null })
 

@@ -2,8 +2,9 @@ interface FirstRunSetupBackend {
   activeRoot?: string
   kind?: string
   platform?: string
-  /** What the local setup card represents: 'none' = installer offer, the rest = use existing. */
-  local?: 'none' | 'installed' | 'bundled'
+  /** What the local setup card represents: 'none' = installer offer, the rest = use existing.
+   *  CORTA CUSTOMIZATION: 'remote-only' = the Light client, which offers no local runtime at all. */
+  local?: 'none' | 'installed' | 'bundled' | 'remote-only'
 }
 
 interface FirstRunSetupGateOptions {
@@ -24,6 +25,8 @@ export function createFirstRunSetupGate({
   stuckAfterMs = 120000
 }: FirstRunSetupGateOptions = {}) {
   let localBootstrapConfirmed = false
+  // CORTA CUSTOMIZATION: the backend the pending choice was offered for.
+  let offeredLocal: FirstRunSetupBackend['local']
 
   let waiter: {
     promise: Promise<FirstRunSetupDecision>
@@ -71,6 +74,7 @@ export function createFirstRunSetupGate({
       return waiter.promise
     }
 
+    offeredLocal = backend?.local
     promptChoice?.(backend)
     armStuckTimer(backend)
 
@@ -100,6 +104,13 @@ export function createFirstRunSetupGate({
   }
 
   const continueLocal = () => {
+    // CORTA CUSTOMIZATION: a remote-only (Light) choice never continues into a local install.
+    if (offeredLocal === 'remote-only') {
+      log?.('[bootstrap] local install refused: this client is remote-only')
+
+      return
+    }
+
     localBootstrapConfirmed = true
     settleWaiter('continue-local')
   }

@@ -35,7 +35,9 @@ export function applyDesktopIdentity(
   },
   identity: Readonly<ProductIdentity> = PRODUCT_IDENTITY
 ): string | null {
-  if (!identity.token && identity.appNamePascal === identity.artifactNamePascal) {
+  // CORTA CUSTOMIZATION: a rebranded stable build (isolatedUserData) pins its
+  // own userData too, instead of Electron's default <appData>/Hermes.
+  if (!identity.token && identity.appNamePascal === identity.artifactNamePascal && !identity.isolatedUserData) {
     return null
   }
 

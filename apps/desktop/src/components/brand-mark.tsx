@@ -1,3 +1,4 @@
+import { BRAND } from '@/branding/brand'
 import { cn } from '@/lib/utils'
 import { useTheme } from '@/themes'
 
@@ -13,9 +14,15 @@ export function BrandMark({ className, ...props }: React.ComponentProps<'span'>)
   const { renderedMode } = useTheme()
   const dark = renderedMode === 'dark'
 
+  // CORTA CUSTOMIZATION: the mark comes from the brand. A brand without a
+  // supplied mark renders none rather than another brand's (or an invented) one.
+  if (!BRAND.mark) {
+    return null
+  }
+
   return (
     <span className={cn('inline-flex size-14 shrink-0 items-center justify-center', className)} {...props}>
-      <img alt="" className="size-full object-contain" src={assetPath(dark ? 'nous-girl-dark.png' : 'nous-girl.png')} />
+      <img alt="" className="size-full object-contain" src={assetPath(dark ? BRAND.mark.dark : BRAND.mark.light)} />
     </span>
   )
 }

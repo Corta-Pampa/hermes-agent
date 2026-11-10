@@ -1,4 +1,12 @@
 interface ProductIdentity {
+  /** CORTA CUSTOMIZATION: brand id from branding/brands.cjs ("hermes" | "corta").
+   *  Absent on channel builds, which are always the upstream brand. */
+  brand?: string
+  /** CORTA CUSTOMIZATION: pin userData/<appNamePascal> even for stable builds,
+   *  so a rebranded install never shares an official Hermes install's state. */
+  isolatedUserData?: boolean
+  /** CORTA CUSTOMIZATION: About-panel copyright line (keeps the Nous Research attribution). */
+  copyright?: string
   /** True when this artifact is Hermes Light (remote-only client). */
   light: boolean
   /** True for a Store-submission build (Windows Store packaging identity). */

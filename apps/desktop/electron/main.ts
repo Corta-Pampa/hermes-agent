@@ -101,6 +101,7 @@ import {
   sshClientFailedError
 } from './backend-start-failure'
 import { describeBootstrapFailure } from './bootstrap-failure-copy'
+import { bootstrapNeededBackend, type BootstrapNeededFacts } from './bootstrap-needed-backend'
 import {
   detectRemoteDisplay,
   isWindowsBinaryPathInWsl,
@@ -4819,6 +4820,7 @@ function writeDefaultProjectDir(dir) {
 
 const installedRuntimeGate = createInstalledRuntimeGate(process.env, rememberLog)
 
+// health: allow CC -- CORTA CUSTOMIZATION: one guard keeps the Light client off local runtimes; this resolver was over target on main
 async function resolveHermesBackend(backendArgs: string[]): Promise<ResolvedHermesBackend> {
   const payload = bundledPayload(process.resourcesPath)
 
@@ -4872,6 +4874,11 @@ async function resolveHermesBackend(backendArgs: string[]): Promise<ResolvedHerm
     if (backend) {
       return backend
     }
+  }
+
+  // CORTA CUSTOMIZATION: past the developer overrides, Light (remote-only) never adopts nor installs a local runtime.
+  if (isLightVariant()) {
+    return bootstrapNeededBackend(backendArgs, bootstrapNeededFacts(), 'remote-only')
   }
 
   // 3. HERMES_DESKTOP_HERMES — an explicit deployment override (the Nix wrapper), not a PATH
@@ -4990,21 +4997,11 @@ async function resolveHermesBackend(backendArgs: string[]): Promise<ResolvedHerm
   //    resolveHermesBackend was the old "no payload" path and forced the
   //    user into a dead end. With the bootstrap protocol, "no install yet"
   //    is a recoverable state the GUI can drive through.
-  return {
-    kind: 'bootstrap-needed',
-    label: 'Hermes Agent not installed yet; bootstrap required',
-    command: null,
-    args: backendArgs,
-    bootstrap: true,
-    env: {},
-    shell: false,
-    // Hints for the bootstrap runner / UI layer:
-    activeRoot: ACTIVE_HERMES_ROOT,
-    installStamp: INSTALL_STAMP, // may be null in dev
-    isPackaged: IS_PACKAGED,
-    platform: process.platform,
-    local: 'none'
-  }
+  return bootstrapNeededBackend(backendArgs, bootstrapNeededFacts(), 'none')
+}
+
+function bootstrapNeededFacts(): BootstrapNeededFacts {
+  return { activeRoot: ACTIVE_HERMES_ROOT, installStamp: INSTALL_STAMP, isPackaged: IS_PACKAGED }
 }
 
 interface ResolvedHermesBackend {
@@ -12055,7 +12052,7 @@ function spawnSecondaryWindow({
     height: SESSION_WINDOW_MIN_HEIGHT,
     minWidth: SESSION_WINDOW_MIN_WIDTH,
     minHeight: SESSION_WINDOW_MIN_HEIGHT,
-    title: 'Hermes',
+    title: APP_NAME, // CORTA CUSTOMIZATION: brand name (was 'Hermes')
     titleBarStyle: 'hidden',
     titleBarOverlay: getTitleBarOverlayOptions(),
     trafficLightPosition: IS_MAC ? WINDOW_BUTTON_POSITION : undefined,
@@ -12160,7 +12157,7 @@ function spawnBrowserWindow(tabId) {
     height: BROWSER_WINDOW_HEIGHT,
     minWidth: BROWSER_WINDOW_MIN_WIDTH,
     minHeight: BROWSER_WINDOW_MIN_HEIGHT,
-    title: 'Hermes',
+    title: APP_NAME, // CORTA CUSTOMIZATION: brand name (was 'Hermes')
     titleBarStyle: 'hidden',
     titleBarOverlay: getTitleBarOverlayOptions(),
     trafficLightPosition: IS_MAC ? WINDOW_BUTTON_POSITION : undefined,
@@ -12272,7 +12269,7 @@ function createInstanceWindow(
     ...nextInstanceBounds(source),
     minWidth: WINDOW_MIN_WIDTH,
     minHeight: WINDOW_MIN_HEIGHT,
-    title: 'Hermes',
+    title: APP_NAME, // CORTA CUSTOMIZATION: brand name (was 'Hermes')
     titleBarStyle: 'hidden',
     titleBarOverlay: getTitleBarOverlayOptions(),
     trafficLightPosition: IS_MAC ? WINDOW_BUTTON_POSITION : undefined,
@@ -13357,7 +13354,7 @@ function createWindow() {
     ),
     minWidth: WINDOW_MIN_WIDTH,
     minHeight: WINDOW_MIN_HEIGHT,
-    title: 'Hermes',
+    title: APP_NAME, // CORTA CUSTOMIZATION: brand name (was 'Hermes')
     // Frameless title bar on every platform so the renderer can paint the
     // "hide sidebar" button (and other left-side titlebar tools) flush with
     // the top edge — matching the macOS layout where the traffic lights sit
@@ -16961,7 +16958,7 @@ function showAboutPanelFresh(): void {
     app.setAboutPanelOptions({
       applicationName: APP_NAME,
       applicationVersion: skew.outOfSync ? `${display} — app build out of date, update the desktop app` : display,
-      copyright: 'Copyright © 2026 Nous Research'
+      copyright: PRODUCT_IDENTITY.copyright ?? 'Copyright © 2026 Nous Research' // CORTA CUSTOMIZATION
     })
     app.showAboutPanel()
   })

@@ -8,19 +8,11 @@
 /// <reference types="node" />
 'use strict'
 
-const variants = {
-  '': { display: 'Hermes', kebab: 'hermes', pascal: 'Hermes' },
-  light: {
-    display: 'Hermes Light',
-    kebab: 'hermes-light',
-    pascal: 'HermesLight'
-  },
-  bundled: {
-    display: 'Hermes Agent',
-    kebab: 'hermes-bundled',
-    pascal: 'HermesBundled'
-  }
-}
+// CORTA CUSTOMIZATION: names and OS identifiers come from the brand layer
+// (branding/brands.cjs). With HERMES_DESKTOP_BRAND unset this is the upstream
+// Hermes table, unchanged.
+const brand = require('./branding/brands.cjs').activeBrand()
+const variants = brand.variants
 
 const variant = process.env.HERMES_DESKTOP_VARIANT || ''
 if (!['', 'light', 'bundled', 'store'].includes(variant)) {
@@ -34,6 +26,9 @@ if (!['', 'light', 'bundled', 'store'].includes(variant)) {
 const store = variant === 'store'
 const light = variant === 'light'
 const name = variants[store ? 'bundled' : (variant || '')]
+if (store && !brand.supportsStore) {
+  throw new Error(`HERMES_DESKTOP_BRAND=${brand.id} has no Store packaging identity`)
+}
 
 // The electron-updater feed channel this build PUBLISHES to. A canary
 // tag (vX.Y.Z+canary.YYYYMMDDTHHMMSSZ) writes canary.yml / light-canary.yml;
@@ -54,7 +49,7 @@ const displayName = buildCommit
 
 const kebabSuffix = buildCommit ? `-${buildCommit}` : canary ? '-canary' : ''
 const pascalSuffix = buildCommit ? `Commit${buildCommit}` : canary ? 'Canary' : ''
-const cliName = `${light ? 'hermes-light' : 'hermes'}${kebabSuffix}`
+const cliName = `${light ? brand.cliNames.light : brand.cliNames.default}${kebabSuffix}`
 if (store && (canary || buildCommit)) {
   throw new Error('Store packaging is only eligible for stable releases')
 }
@@ -63,17 +58,20 @@ if (store && (canary || buildCommit)) {
 
 /** @type {ProductIdentity} */
 const identity = {
+  brand: brand.id,
+  isolatedUserData: brand.isolatedUserData,
+  copyright: brand.copyright,
   store,
   light,
   displayName,
-  appId: `com.nousresearch.${name.kebab}${kebabSuffix}`,
+  appId: `${brand.appIdPrefix}.${name.kebab}${kebabSuffix}`,
   // Store and commit builds do not publish a release feed.
   channel: store || buildCommit ? null : light ? (canary ? 'light-canary' : 'light') : (canary ? 'canary' : 'latest'),
   appNamePascal: `${name.pascal}${pascalSuffix}`,
   artifactNamePascal: name.pascal,
   windowsExecutableName: kebabSuffix ? cliName : displayName,
   cliName,
-  msixAppIdWithOrg: `NousResearch.${name.pascal}${pascalSuffix}`,
+  msixAppIdWithOrg: `${brand.msixOrg}.${name.pascal}${pascalSuffix}`,
   ...(store
     ? {
         storeMsix: {
