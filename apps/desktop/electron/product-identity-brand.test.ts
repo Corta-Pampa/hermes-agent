@@ -2,7 +2,10 @@
 // HERMES_DESKTOP_BRAND unset must stay the upstream Hermes identity; =corta
 // must never reuse a Nous Research OS identity, update origin or artwork.
 import assert from 'node:assert/strict'
+import fs from 'node:fs'
 import { createRequire } from 'node:module'
+import os from 'node:os'
+import path from 'node:path'
 
 import { afterEach, test } from 'vitest'
 
@@ -68,16 +71,23 @@ test('Corta refuses the Store variant (no Corta Partner Center identity)', (): v
 
 test('a Corta stable build pins its own userData before first access', (): void => {
   const calls: string[] = []
+  // applyDesktopIdentity really creates the directory: a writable temp root, never '/'.
+  const appData: string = fs.mkdtempSync(path.join(os.tmpdir(), 'corta-appdata-'))
 
   const app = {
-    getPath: (): string => '/appData',
+    getPath: (): string => appData,
     setPath: (_name: 'userData', value: string): void => void calls.push(value),
     setName: (): void => {}
   }
 
-  assert.equal(applyDesktopIdentity(app, identity(undefined, 'light')), null)
-  assert.equal(applyDesktopIdentity(app, identity('corta', 'light')), 'Corta')
-  assert.deepEqual(calls, ['/appData/CortaDesktop'])
+  try {
+    assert.equal(applyDesktopIdentity(app, identity(undefined, 'light')), null)
+    assert.equal(applyDesktopIdentity(app, identity('corta', 'light')), 'Corta')
+    assert.deepEqual(calls, [path.join(appData, 'CortaDesktop')])
+    assert.ok(fs.statSync(path.join(appData, 'CortaDesktop')).isDirectory())
+  } finally {
+    fs.rmSync(appData, { recursive: true, force: true })
+  }
 })
 
 test('Corta packaging publishes to updates.corta.fr, never GitHub, with no Nous artwork', (): void => {
