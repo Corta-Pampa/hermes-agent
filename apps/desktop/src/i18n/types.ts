@@ -3557,6 +3557,8 @@ export interface Translations extends NoticeTranslations {
       xhigh: string
       max: string
       ultra: string
+      /** Compact effort labels for the composer pill and model rows, keyed by level. */
+      effortShort: Record<string, string>
       /** The CLI's `/reasoning` clamp note, e.g. "sends Max on this route". */
       sendsOnRoute: (level: string) => string
       updateFailed: string

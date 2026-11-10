@@ -68,8 +68,6 @@ export function shouldDisableComposerInput(disabled: boolean, gatewayState: Conn
   return disabled && gatewayState === 'open'
 }
 
-export const pickPlaceholder = (pool: readonly string[]) => pool[Math.floor(Math.random() * pool.length)]
-
 /**
  * Width classes for the unstacked vs stacked composer editor.
  *

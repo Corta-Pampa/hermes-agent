@@ -303,6 +303,7 @@ export const zhHantChrome = {
       xhigh: '極高',
       max: '最高',
       ultra: '超高',
+      effortShort: { none: '關', minimal: '最低', low: '低', medium: '中', high: '高', xhigh: '極高', max: '最大', ultra: '超高' },
       sendsOnRoute: (level: string) => `此路由實際傳送 ${level}`,
       updateFailed: '模型選項更新失敗',
       fastFailed: '快速模式更新失敗',

@@ -701,6 +701,7 @@ export const zhOverrides = {
       appearance: '外观',
       workspace: '工作区',
       safety: '安全',
+      browser: '浏览器',
       memory: '记忆与上下文',
       voice: '语音',
       advanced: '高级'
@@ -3944,6 +3945,7 @@ export const zhOverrides = {
       xhigh: '极高',
       max: '最高',
       ultra: '超高',
+      effortShort: { none: '关', minimal: '最低', low: '低', medium: '中', high: '高', xhigh: '极高', max: '最大', ultra: '超高' },
       sendsOnRoute: (level: string) => `此路由实际发送 ${level}`,
       updateFailed: '模型选项更新失败',
       fastFailed: '快速模式更新失败',

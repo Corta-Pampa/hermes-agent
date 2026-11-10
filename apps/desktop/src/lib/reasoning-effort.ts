@@ -2,8 +2,8 @@ import { DEFAULT_REASONING_EFFORT, isReasoningEffort, type ReasoningEffort } fro
 
 import { normalize } from '@/lib/text'
 
-/** Compact labels for chrome where space is tight (pill, picker rows). Menus
- *  and settings use the translated `shell.modelOptions` strings instead. */
+/** Compact labels for chrome where space is tight (pill, picker rows), in
+ *  English; callers pass the translated `shell.modelOptions.effortShort`. */
 const SHORT_LABELS: Record<string, string> = {
   none: 'Off',
   minimal: 'Min',
@@ -40,15 +40,16 @@ export function reasoningEffortClamp(
 
 /** Compact label; a clamped pick shows both ends ("Ultra→Max") so the pill
  *  never presents a Hermes step as a wire level the route does not have. */
-export function reasoningEffortLabel(effort: string, wire?: string): string {
+export function reasoningEffortLabel(effort: string, wire?: string, labels: Record<string, string> = SHORT_LABELS): string {
   const key = normalize(effort)
   const clamp = reasoningEffortClamp(effort, wire)
+  const short = (level: string, fallback: string = level) => labels[level] ?? SHORT_LABELS[level] ?? fallback
 
   if (clamp) {
-    return `${SHORT_LABELS[clamp.effort]}→${SHORT_LABELS[clamp.wire]}`
+    return `${short(clamp.effort)}→${short(clamp.wire)}`
   }
 
-  return key ? (SHORT_LABELS[key] ?? effort) : ''
+  return key ? short(key, effort) : ''
 }
 
 /** Thinking is on unless a level explicitly says otherwise; an empty value

@@ -400,6 +400,7 @@ export const arChrome = {
       medium: 'متوسط',
       high: 'عالٍ',
       max: 'أقصى',
+      effortShort: { none: 'إيقاف', minimal: 'أدنى', low: 'منخفض', medium: 'متوسط', high: 'عالٍ', xhigh: 'عالٍ جدًا', max: 'أقصى', ultra: 'فائق' },
       sendsOnRoute: (level: string) => `يُرسل ${level} على هذا المسار`,
       updateFailed: 'فشل تحديث خيار النموذج',
       fastFailed: 'فشل تحديث الوضع السريع',
