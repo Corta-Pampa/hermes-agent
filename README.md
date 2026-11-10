@@ -1,3 +1,10 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="apps/desktop/public/corta/logo-dark.svg">
+    <img alt="Corta" src="apps/desktop/public/corta/logo.svg" width="320">
+  </picture>
+</p>
+
 # Corta — Hermes Agent Distribution
 
 > **This is not the official Hermes Agent repository.**
@@ -7,6 +14,26 @@
 > https://github.com/NousResearch/hermes-agent · https://hermes-agent.nousresearch.com/docs/
 
 ---
+
+## Corta Desktop
+
+What a user sees, on a computer set to French. The conversation uses a demo model; on a real
+deployment the answers come from the firm's server.
+
+| | |
+|---|---|
+| ![First launch: connect to the firm's Corta server](corta/docs/screenshots/premier-lancement.png) | ![Gateway connection form](corta/docs/screenshots/connexion.png) |
+| **First launch.** Remote-only: the app only offers to connect to the firm's server. | **Connection.** Gateway URL, then a session token or browser sign-in. |
+| ![Home, light mode](corta/docs/screenshots/light-accueil.png) | ![Conversation, light mode](corta/docs/screenshots/light-conversation.png) |
+| **Home** (light mode). | **Conversation** (light mode). |
+| ![Home, dark mode](corta/docs/screenshots/dark-accueil.png) | ![Conversation, dark mode](corta/docs/screenshots/dark-conversation.png) |
+| **Home** (dark mode). | **Conversation** (dark mode). |
+| ![Settings](corta/docs/screenshots/reglages.png) | |
+| **Settings.** | |
+
+Regenerating them: build with `pnpm run build:corta` in `apps/desktop`, launch it against a gateway, and
+capture; the brand (logo, ink `#0A0A16` / paper `#E7EDF7` / mint `#6FBF98` palette) is described in
+[`corta/docs/BRANDING.md`](corta/docs/BRANDING.md).
 
 ## 1. About this repository
 
@@ -62,8 +89,8 @@ Every Corta change in an upstream file is marked `CORTA CUSTOMIZATION`. Corta-on
 |---|---|---|
 | **Branding** | A brand layer selected at build time (`HERMES_DESKTOP_BRAND=corta`). Unset, every build is byte-for-byte upstream Hermes. | `apps/desktop/branding/brands.cjs` |
 | Branding | Product name "Corta" in window titles, native menus, About panel, tray, notifications, quit dialog and all bundled UI copy (9 locales); "Hermes Agent" (engine) and "Hermes Cloud" (a Nous service) are kept where they are true. | `src/branding/copy.ts`, `electron/brand-name.ts`, `branding/vite-brand.mjs` |
-| Branding | The Hermes/Nous brand mark is not shown. Corta's mark, icons and installer artwork are **not supplied yet**; a release gate blocks client installers until they are. | `corta/docs/BRAND_ASSETS.md`, `corta/scripts/check-brand-assets.mjs` |
-| **Theme** | A native "Corta" preset in the Hermes theme system (light + dark, all surfaces, terminal palettes), default on every new install; the alternative built-in presets and server-pushed CLI skins are not offered. Its colour values are a neutral upstream palette until Corta's tokens are supplied. | `src/branding/corta-theme.ts`, `src/branding/themes.ts` |
+| Branding | Corta's logo (empty chat, first launch, About) and app icons for macOS, Windows and Linux, rendered from `corta/brand/logo/` by `corta/scripts/generate-icons.py`. A release gate blocks a client installer that still ships Hermes/Nous artwork. | `corta/docs/BRAND_ASSETS.md`, `corta/scripts/check-brand-assets.mjs` |
+| **Theme** | A native "Corta" preset in the Hermes theme system (light + dark, all surfaces, terminal palettes), default on every new install; the alternative built-in presets and server-pushed CLI skins are not offered. Its palette is Corta's: ink `#0A0A16`, paper `#E7EDF7`, mint `#6FBF98` as a sparing accent. | `src/branding/corta-theme.ts`, `src/branding/themes.ts` |
 | **Packaging** | Corta OS identity: `fr.corta.desktop`, product "Corta", own userData directory, own MSIX identity/publisher, no Nous artwork, metadata/copyright with Nous Research attribution. Store packaging refused (no Corta Store identity). | `branding/brands.cjs`, `product-identity.cjs`, `electron-builder.config.cjs` |
 | **Desktop configuration** | The light variant is strictly remote-only: it never adopts a Hermes install found on the computer and never offers or starts a local install. | `electron/main.ts`, `electron/bootstrap-needed-backend.ts`, `electron/first-run-setup-gate.ts`, `src/components/desktop-install-local-card.ts` |
 | **Distribution** | Updates come from `https://updates.corta.fr`, never from Nous Research's feeds or GitHub releases. Corta build scripts (`dist:corta:*`). | `branding/brands.cjs`, `apps/desktop/package.json`, `corta/docs/RELEASE.md` |
