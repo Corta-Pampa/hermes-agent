@@ -53,6 +53,7 @@ const BRANDS = {
       id: 'hermes',
       productName: 'Hermes',
       mark: { light: 'nous-girl.png', dark: 'nous-girl-dark.png' },
+      logo: null,
       defaultSkin: null,
       builtinSkins: null,
       rewriteCopy: false,
@@ -93,18 +94,21 @@ const BRANDS = {
       lightSynopsis: 'Corta remote desktop client.'
     },
     macCategory: 'public.app-category.business',
-    // No Corta installer artwork exists yet (corta/docs/BRAND_ASSETS.md):
-    // null keeps electron-builder's neutral defaults instead of Nous artwork.
-    dmg: { title: null, background: null, icon: null },
+    // The volume icon is Corta's (corta/scripts/generate-icons.py rewrites
+    // dmg-volume.icns). No Corta DMG background exists yet: null keeps
+    // electron-builder's neutral default instead of the Nous artwork.
+    dmg: { title: null, background: null, icon: 'packaging/dmg-volume.icns' },
     // The Corta-controlled update origin. CLOUDFLARE_R2_PUBLIC_URL (CI) still
     // wins when set; GitHub releases are never used as a Corta feed.
     updates: { feedBaseUrl: 'https://updates.corta.fr', allowGithubFallback: false },
     renderer: {
       id: 'corta',
       productName: 'Corta',
-      // No Corta mark has been supplied: render no mark rather than a Hermes
-      // one or an invented one. Drop the files in public/corta/ and set them.
-      mark: null,
+      // Sources: corta/brand/logo/. The dark-mode files are Corta's own
+      // (light badge, ink letters); the light-mode files swap the two brand
+      // colors so the badge does not vanish on the #E7EDF7 background.
+      mark: { light: 'corta/mark.svg', dark: 'corta/mark-dark.svg' },
+      logo: { light: 'corta/logo.svg', dark: 'corta/logo-dark.svg' },
       defaultSkin: 'corta',
       builtinSkins: ['corta'],
       rewriteCopy: true,

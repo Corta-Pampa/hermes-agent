@@ -28,6 +28,8 @@ else
     changed() { git ls-files --others --exclude-standard; }
 fi
 node scripts/generate-icons.mjs
+# CORTA CUSTOMIZATION: the desktop icons Corta ships are drawn from Corta's own icon.
+"${HERMES_PYTHON:-python}" -I corta/scripts/generate-icons.py
 node scripts/generate-icons.mjs --check
 if ! git diff --exit-code --stat || [ -n "$(changed)" ]; then
     changed

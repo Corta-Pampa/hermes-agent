@@ -160,13 +160,27 @@ export function I18nProvider({
     let retryCount = 0
 
     // The desktop races its own backend at startup: the renderer mounts before
-    // the backend is ready, so the first /api/config call can time out. We keep
-    // the established permanent-failure contract — a rejected config load
-    // settles on English so the UI stays usable — but bounded retries recover
+    // the backend is ready, so the first /api/config call can time out. A
+    // rejected config load settles on the OS language (English when unknown)
+    // so the UI stays usable, and bounded retries recover
     // transient startup failures, applying the persisted display.language once
     // the backend comes up.
     const MAX_LOCALE_RETRIES = 10
     const LOCALE_RETRY_DELAY_MS = 3_000
+
+    // CORTA CUSTOMIZATION: paint the OS language while the config is pending.
+    // A remote-only client with no gateway yet never gets an answer, so its
+    // first screens would otherwise stay English. Any config answer wins.
+    let configSettled = false
+
+    void window.hermesDesktop
+      ?.getMachineProfile?.()
+      .then(profile => {
+        if (!cancelled && !configSettled && !userLocaleRef.current) {
+          setLocaleState(resolveInitialLocale(null, profile?.locale))
+        }
+      })
+      .catch(() => undefined)
 
     const loadLocale = () => {
       setIsLoadingConfig(true)
@@ -175,6 +189,8 @@ export function I18nProvider({
       return configClient
         .getConfig()
         .then(async config => {
+          configSettled = true
+
           if (cancelled || userLocaleRef.current) {
             return
           }
@@ -202,13 +218,22 @@ export function I18nProvider({
             setLocaleState(resolveInitialLocale(requestedRef.current, machineProfile?.locale))
           }
         })
-        .catch(error => {
+        .catch(async error => {
           if (cancelled || userLocaleRef.current) {
             return
           }
 
           setConfigLoadError(toError(error))
-          setLocaleState(DEFAULT_LOCALE)
+          // CORTA CUSTOMIZATION: no config to read (a remote-only client before
+          // its gateway is set up, or a backend still booting) settles on the
+          // OS language rather than English; English remains the last resort.
+          const machineProfile = await window.hermesDesktop?.getMachineProfile?.().catch(() => null)
+
+          if (cancelled || userLocaleRef.current) {
+            return
+          }
+
+          setLocaleState(resolveInitialLocale(null, machineProfile?.locale))
 
           if (retryCount < MAX_LOCALE_RETRIES) {
             retryCount += 1

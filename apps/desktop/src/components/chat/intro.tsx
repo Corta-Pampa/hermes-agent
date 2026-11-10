@@ -1,5 +1,7 @@
 import { useState } from 'react'
 
+import { BRAND } from '@/branding/brand'
+import { BrandLogo } from '@/components/brand-mark'
 import { useI18n } from '@/i18n'
 import { capitalize, normalize } from '@/lib/text'
 
@@ -176,7 +178,12 @@ export function Intro({ personality, seed }: IntroProps) {
       data-slot="aui_intro"
     >
       <div className="w-full min-w-0">
-        <Wordmark className="mb-1" text={WORDMARK} />
+        {/* CORTA CUSTOMIZATION: a brand logotype replaces the upstream lettering. */}
+        {BRAND.logo ? (
+          <BrandLogo className="mb-6 w-[min(22rem,70%)]" />
+        ) : (
+          <Wordmark className="mb-1" text={WORDMARK} />
+        )}
 
         <p className="m-0 text-center leading-normal tracking-tight">{body}</p>
       </div>

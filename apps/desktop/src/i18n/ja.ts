@@ -478,6 +478,7 @@ export const jaOverrides = {
       appearance: '外観',
       workspace: 'ワークスペース',
       safety: '安全性',
+      browser: 'ブラウザ',
       memory: 'メモリとコンテキスト',
       voice: '音声',
       advanced: '詳細'
@@ -2959,6 +2960,7 @@ export const jaOverrides = {
       xhigh: '特高',
       max: '最大',
       ultra: 'ウルトラ',
+      effortShort: { none: 'オフ', minimal: '最小', low: '低', medium: '中', high: '高', xhigh: '超高', max: '最大', ultra: 'ウルトラ' },
       sendsOnRoute: (level: string) => `このルートでは ${level} を送信`,
       updateFailed: 'モデルオプションの更新に失敗しました',
       fastFailed: '高速モードの更新に失敗しました',

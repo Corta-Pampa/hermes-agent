@@ -6,17 +6,22 @@
 // popovers/menus/modals, borders, inputs, focus rings, buttons, bubbles,
 // status colors and the integrated terminal. No global CSS override is used.
 //
-// ─── BRAND TOKENS: NOT SUPPLIED YET ─────────────────────────────────────────
-// No Corta color or typography specification exists in this repository, and
-// none may be invented (corta/docs/BRAND_ASSETS.md lists what to supply). Until
-// Corta's tokens are filled in below, each slot falls back to the upstream
-// `github` preset (GitHub Light Default / Dark Default): a neutral, AA-checked
-// palette with hand-tuned light AND dark modes and complete terminal ANSI sets.
-// Typography falls back to the system UI stacks, with no remote font download
-// (a client on a firm's network should not fetch fonts from a third party).
+// ─── BRAND TOKENS ───────────────────────────────────────────────────────────
+// Corta's palette is three colors: ink #0A0A16, paper #E7EDF7 and an
+// occasional mint #6FBF98. Every other slot is a mix of those (ink↔paper for
+// surfaces and borders, paper/ink↔mint for soft tints), with text contrast
+// checked at ≥ 4.5:1 on every surface it sits on.
 //
-// To apply the Corta identity: fill CORTA_TOKENS (partial overrides are fine),
-// rebuild, and review both modes. Nothing else in the app needs to change.
+// Mint is the accent, used sparingly. It reaches only 1.9:1 on paper, so in
+// light mode it never carries text or the focus ring: it tints the user bubble,
+// secondary buttons and the composer outline, while the brand stroke
+// (midground: section labels, active pills, streaming cursor) stays ink. On ink
+// it reaches 9:1, so dark mode uses it as the brand stroke and focus ring.
+//
+// Unsupplied slots (destructive red, terminal ANSI sets, typography) fall back
+// to the upstream `github` preset and the system UI font stacks, with no remote
+// font download (a client on a firm's network should not fetch fonts from a
+// third party).
 
 import type { DesktopTerminalPalette, DesktopTheme, DesktopThemeColors, DesktopThemeTypography } from '@/themes/types'
 
@@ -31,10 +36,64 @@ interface CortaTokens {
   typography: Partial<DesktopThemeTypography>
 }
 
-/** Corta's own values. Empty = not supplied by Corta yet (see header). */
+const INK = '#0A0A16'
+const PAPER = '#E7EDF7'
+const MINT = '#6FBF98'
+
+/** Corta's own values (see header); omitted slots fall back to the preset. */
 export const CORTA_TOKENS: CortaTokens = {
-  light: {},
-  dark: {},
+  light: {
+    background: PAPER,
+    foreground: INK,
+    card: '#F2F5FB',
+    cardForeground: INK,
+    muted: '#DCE2EC',
+    mutedForeground: '#5A5C67',
+    popover: '#F5F8FC',
+    popoverForeground: INK,
+    primary: INK,
+    primaryForeground: PAPER,
+    secondary: '#CDE3E2',
+    secondaryForeground: INK,
+    accent: '#D8DDE7',
+    accentForeground: INK,
+    border: '#C6CBD5',
+    input: '#F5F8FC',
+    ring: INK,
+    midground: INK,
+    midgroundForeground: PAPER,
+    composerRing: MINT,
+    sidebarBackground: '#DFE5EF',
+    sidebarBorder: '#C6CBD5',
+    userBubble: '#CFE4E4',
+    userBubbleBorder: '#B1D8CC'
+  },
+  dark: {
+    background: INK,
+    foreground: PAPER,
+    card: '#12121E',
+    cardForeground: PAPER,
+    muted: '#191A26',
+    mutedForeground: '#8F929D',
+    popover: '#171824',
+    popoverForeground: PAPER,
+    primary: PAPER,
+    primaryForeground: INK,
+    secondary: '#1C2B2D',
+    secondaryForeground: PAPER,
+    accent: '#1E1E2A',
+    accentForeground: PAPER,
+    border: '#2D2E3A',
+    input: '#080810',
+    ring: MINT,
+    midground: MINT,
+    midgroundForeground: INK,
+    composerRing: MINT,
+    sidebarBackground: '#07070F',
+    sidebarBorder: '#2D2E3A',
+    userBubble: '#172227',
+    userBubbleBorder: '#2A4440'
+  },
   terminal: {},
   darkTerminal: {},
   typography: {}

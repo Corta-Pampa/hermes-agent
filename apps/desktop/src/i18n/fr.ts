@@ -959,6 +959,7 @@ export const frOverrides = {
       appearance: 'Apparence',
       workspace: 'Espace de travail',
       safety: 'Sécurité',
+      browser: 'Navigateur',
       memory: 'Mémoire et contexte',
       voice: 'Voix',
       advanced: 'Avancé'
@@ -4548,6 +4549,7 @@ export const frOverrides = {
       xhigh: 'Très élevé',
       max: 'Max',
       ultra: 'Ultra',
+      effortShort: { none: 'Désact.', minimal: 'Min', low: 'Bas', medium: 'Moy.', high: 'Haut', xhigh: 'T. haut', max: 'Max', ultra: 'Ultra' },
       sendsOnRoute: (level: string) => `envoie ${level} sur cette route`,
       updateFailed: "Échec de la mise à jour de l'option du modèle",
       fastFailed: 'Échec de la mise à jour du mode rapide',

@@ -934,6 +934,7 @@ export const en: Translations = {
       appearance: 'Appearance',
       workspace: 'Workspace',
       safety: 'Safety',
+      browser: 'Browser',
       memory: 'Memory & Context',
       voice: 'Voice',
       advanced: 'Advanced'
@@ -4093,6 +4094,7 @@ export const en: Translations = {
       xhigh: 'Extra High',
       max: 'Max',
       ultra: 'Ultra',
+      effortShort: { none: 'Off', minimal: 'Min', low: 'Low', medium: 'Med', high: 'High', xhigh: 'XHigh', max: 'Max', ultra: 'Ultra' },
       sendsOnRoute: (level: string) => `sends ${level} on this route`,
       updateFailed: 'Model option update failed',
       fastFailed: 'Fast mode update failed',

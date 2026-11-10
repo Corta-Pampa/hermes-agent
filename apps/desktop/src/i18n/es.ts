@@ -960,6 +960,7 @@ export const esOverrides = {
       appearance: 'Apariencia',
       workspace: 'Espacio de trabajo',
       safety: 'Seguridad',
+      browser: 'Navegador',
       memory: 'Memoria y contexto',
       voice: 'Voz',
       advanced: 'Avanzado'
@@ -4523,6 +4524,7 @@ export const esOverrides = {
       xhigh: 'Extra alto',
       max: 'Máximo',
       ultra: 'Ultra',
+      effortShort: { none: 'No', minimal: 'Mín', low: 'Bajo', medium: 'Medio', high: 'Alto', xhigh: 'M. alto', max: 'Máx', ultra: 'Ultra' },
       sendsOnRoute: (level: string) => `envía ${level} en esta ruta`,
       updateFailed: 'No se pudo actualizar la opción del modelo',
       fastFailed: 'No se pudo actualizar el modo rápido',

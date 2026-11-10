@@ -957,6 +957,7 @@ export const deOverrides = {
       appearance: 'Darstellung',
       workspace: 'Arbeitsbereich',
       safety: 'Sicherheit',
+      browser: 'Browser',
       memory: 'Speicher & Kontext',
       voice: 'Sprache',
       advanced: 'Erweitert'
@@ -4539,6 +4540,7 @@ export const deOverrides = {
       xhigh: 'Extra hoch',
       max: 'Max',
       ultra: 'Ultra',
+      effortShort: { none: 'Aus', minimal: 'Min', low: 'Niedr.', medium: 'Mittel', high: 'Hoch', xhigh: 'S. hoch', max: 'Max', ultra: 'Ultra' },
       sendsOnRoute: (level: string) => `sendet ${level} auf dieser Route`,
       updateFailed: 'Aktualisierung der Modelloptie schlug fehl',
       fastFailed: 'Aktualisierung des Schnell-Modus schlug fehl',

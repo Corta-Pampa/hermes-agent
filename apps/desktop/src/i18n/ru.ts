@@ -457,6 +457,7 @@ export const ruOverrides = {
       appearance: 'Внешний вид',
       workspace: 'Рабочее пространство',
       safety: 'Безопасность',
+      browser: 'Браузер',
       memory: 'Память и контекст',
       voice: 'Голос',
       advanced: 'Дополнительно'
@@ -3206,6 +3207,7 @@ export const ruOverrides = {
       xhigh: 'Очень высокое',
       max: 'Максимум',
       ultra: 'Ультра',
+      effortShort: { none: 'Выкл', minimal: 'Мин', low: 'Низк.', medium: 'Сред.', high: 'Выс.', xhigh: 'Оч. выс.', max: 'Макс', ultra: 'Ультра' },
       sendsOnRoute: (level: string) => `на этом маршруте отправляется ${level}`,
       updateFailed: 'Не удалось обновить опцию модели',
       fastFailed: 'Не удалось обновить быстрый режим',

@@ -1,3 +1,4 @@
+import { useI18n } from '@/i18n'
 import { NEW_SESSION_TITLE } from '@/lib/chat-runtime'
 import { useStoreSelector } from '@/lib/use-session-slice'
 import { $draftTitles, draftTitleIn } from '@/store/composer'
@@ -21,5 +22,16 @@ export interface SessionDraftTitleProps {
  * reads the same as one never typed into.
  */
 export function SessionDraftTitle({ scope }: SessionDraftTitleProps) {
-  return useStoreSelector($draftTitles, titles => draftTitleIn(titles, scope)) || NEW_SESSION_TITLE
+  const placeholder = useNewSessionLabel()
+
+  return useStoreSelector($draftTitles, titles => draftTitleIn(titles, scope)) || placeholder
+}
+
+/** The unsent-session placeholder in the UI language. NEW_SESSION_TITLE stays
+ *  the canonical value registries store and compare; only what is painted is
+ *  translated. */
+export function useNewSessionLabel(): string {
+  const { t } = useI18n()
+
+  return t.keybinds.actions['session.new'] ?? NEW_SESSION_TITLE
 }
