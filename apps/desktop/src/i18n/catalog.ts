@@ -1,3 +1,6 @@
+import { BRAND } from '@/branding/brand'
+import { brandCatalogs } from '@/branding/copy'
+
 import { ar } from './ar'
 import { de } from './de'
 import { en } from './en'
@@ -12,7 +15,7 @@ import { zhHant } from './zh-hant'
 /** The catalogs compiled into the app. Runtime-registered languages (plugin
  *  packs, backend `.desktop.yaml` packs) are NOT here — resolve through
  *  `resolveTranslations()` in `./registry`, which layers them over these. */
-export const TRANSLATIONS: Record<BundledLocale, Translations> = {
+const BUNDLED_TRANSLATIONS: Record<BundledLocale, Translations> = {
   en,
   zh,
   'zh-hant': zhHant,
@@ -23,6 +26,10 @@ export const TRANSLATIONS: Record<BundledLocale, Translations> = {
   de,
   es
 }
+
+// CORTA CUSTOMIZATION: a rebranded build names its own product in the bundled
+// copy; the upstream brand gets the catalogs back untouched (src/branding/copy.ts).
+export const TRANSLATIONS: Record<BundledLocale, Translations> = brandCatalogs(BUNDLED_TRANSLATIONS, BRAND)
 
 export const BUNDLED_LOCALES = Object.keys(TRANSLATIONS) as readonly BundledLocale[]
 

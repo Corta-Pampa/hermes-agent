@@ -19,6 +19,7 @@
 import type { HermesSkin } from '@hermes/shared/skin'
 import { atom } from 'nanostores'
 
+import { brandLocksSkins } from '@/branding/brand'
 import { readJson, writeJson } from '@/lib/storage'
 
 import { BUILTIN_THEMES, DEFAULT_SKIN_NAME, RETIRED_SKINS } from './presets'
@@ -101,7 +102,9 @@ export function __resetBackendSkinSync(): void {
 export function ingestBackendSkin(skin: HermesSkin | undefined | null, { apply }: { apply: boolean }): void {
   const name = (skin && typeof skin === 'object' ? (skin.name ?? '') : '').trim()
 
-  if (!name) {
+  // CORTA CUSTOMIZATION: a brand that pins its skins keeps its look whatever
+  // CLI skin the (remote) backend runs; the desktop pick stays authoritative.
+  if (!name || brandLocksSkins()) {
     return
   }
 

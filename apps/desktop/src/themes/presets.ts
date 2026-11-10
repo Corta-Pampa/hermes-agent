@@ -20,6 +20,8 @@
 
 import { THEME_PRESET_PALETTES } from '@hermes/shared'
 
+import { brandBuiltinThemes, brandDefaultSkin } from '@/branding/themes'
+
 import { skinToDesktopTheme } from './skin'
 import type { DesktopTheme, DesktopThemeTypography } from './types'
 
@@ -441,7 +443,7 @@ export const slateTheme: DesktopTheme = {
   }
 }
 
-export const BUILTIN_THEMES: Record<string, DesktopTheme> = {
+const UPSTREAM_BUILTIN_THEMES: Record<string, DesktopTheme> = {
   nous: nousTheme,
   github: githubTheme,
   catppuccin: catppuccinTheme,
@@ -456,10 +458,18 @@ export const BUILTIN_THEMES: Record<string, DesktopTheme> = {
   cyberpunk: cyberpunkTheme
 }
 
+// CORTA CUSTOMIZATION: the brand decides which presets ship (a Corta build
+// offers only its own) and which one a fresh install paints. Upstream brand =
+// the table and default above, unchanged. See src/branding/themes.ts.
+export const BUILTIN_THEMES: Record<string, DesktopTheme> = brandBuiltinThemes(
+  UPSTREAM_BUILTIN_THEMES,
+  DEFAULT_TYPOGRAPHY
+)
+
 export const BUILTIN_THEME_LIST = Object.values(BUILTIN_THEMES)
 
 /** Skin used when nothing is persisted or the persisted name is retired. */
-export const DEFAULT_SKIN_NAME = 'nous'
+export const DEFAULT_SKIN_NAME = brandDefaultSkin('nous')
 
 /** Names that no longer resolve to a skin of their own. A stored pick of one
  *  falls back to DEFAULT_SKIN_NAME, and a cached backend theme under one is

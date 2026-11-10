@@ -36,6 +36,7 @@ import { fileURLToPath } from 'url'
 
 import tailwindcss from '@tailwindcss/vite'
 
+import { desktopBrand } from './branding/vite-brand.mjs'
 import { withCompilerCache } from './scripts/compiler-cache.mjs'
 
 // The runner loads this as ESM without the default bundler's CJS globals.
@@ -137,7 +138,8 @@ const emojibaseAssets = () => ({
 
 export default defineConfig(({ command }) => ({
   base: './',
-  plugins: [react(), cachedCompilerPass(command), tailwindcss(), emojibaseAssets()],
+  // CORTA CUSTOMIZATION: desktopBrand() bakes the HERMES_DESKTOP_BRAND brand (branding/).
+  plugins: [react(), cachedCompilerPass(command), tailwindcss(), emojibaseAssets(), desktopBrand()],
   css: {
     // Pin an explicit (empty) PostCSS config. Tailwind is handled entirely by
     // `@tailwindcss/vite`, so the renderer needs no PostCSS plugins — and

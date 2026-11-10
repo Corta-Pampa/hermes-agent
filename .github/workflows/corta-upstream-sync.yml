@@ -1,0 +1,144 @@
+# CORTA CUSTOMIZATION — Corta-only workflow (absent upstream; never conflicts).
+#
+# Watches NousResearch/hermes-agent and prepares, never publishes, a sync:
+#   1. fetch upstream main + release tags, report new commits / tags / touchpoints
+#   2. merge upstream into a fresh `corta/sync/upstream-<date>` branch
+#   3. on conflict: stop, list the conflicts (Corta touchpoints flagged), fail red
+#   4. on a clean merge: run the desktop checks + the Corta Light build, push the
+#      sync branch, and (opt-in) open a PR into main for human review
+#
+# It never pushes to main, never force-pushes, never resolves a conflict, never
+# builds an installer, never uploads a release, and uses no secret beyond the
+# workflow's own GITHUB_TOKEN. See corta/docs/UPSTREAM_SYNC.md.
+#
+# Opt-ins (Settings → Secrets and variables → Actions → Variables):
+#   CORTA_SYNC_OPEN_PR=true   open a PR for a clean sync branch (needs "Allow
+#                             GitHub Actions to create and approve pull requests")
+name: Corta upstream sync
+
+on:
+  schedule:
+    - cron: '17 5 * * 1-5' # weekdays 05:17 UTC
+  workflow_dispatch:
+    inputs:
+      upstream_branch:
+        description: Upstream branch to merge
+        default: main
+        type: string
+
+concurrency:
+  group: corta-upstream-sync
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    name: Merge upstream into a sync branch
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    permissions:
+      contents: write # push the corta/sync/* branch only
+      pull-requests: write # opt-in PR (CORTA_SYNC_OPEN_PR)
+    env:
+      UPSTREAM_BRANCH: ${{ inputs.upstream_branch || 'main' }}
+      CORTA_BRANCH: ${{ github.event.repository.default_branch }}
+      REPORT_FILE: ${{ github.workspace }}/corta-sync-report.md
+    steps:
+      - uses: actions/checkout@f548e57e544e1ff5a4c46bf1e1b8685f8e4a348a # v7.0.1
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          fetch-depth: 0
+
+      - name: Identify the sync bot
+        run: |
+          git config user.name 'corta-sync[bot]'
+          git config user.email 'corta-sync@users.noreply.github.com'
+          # Isolated Hermes state for the build tools (never the runner's home).
+          echo "HERMES_HOME=$RUNNER_TEMP/hermes-home" >> "$GITHUB_ENV"
+          echo "HERMES_RUNTIME_DIR=$RUNNER_TEMP/hermes-runtime" >> "$GITHUB_ENV"
+
+      - name: Report and merge upstream
+        id: merge
+        run: |
+          set +e
+          bash corta/scripts/sync-upstream.sh
+          status=$?
+          set -e
+          echo "branch=$(git branch --show-current)" >> "$GITHUB_OUTPUT"
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          cat "$REPORT_FILE" >> "$GITHUB_STEP_SUMMARY"
+          if grep -q 'Nothing to merge' "$REPORT_FILE"; then echo "uptodate=true" >> "$GITHUB_OUTPUT"; fi
+          if [ "$status" -eq 1 ]; then
+            echo "::error::Upstream merge has conflicts. Nothing was pushed. Resolve locally with corta/scripts/sync-upstream.sh (see the job summary)."
+          fi
+          exit 0
+
+      - name: Upload the sync report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: corta-sync-report
+          path: corta-sync-report.md
+          if-no-files-found: ignore
+
+      - name: Stop on conflicts or errors
+        if: steps.merge.outputs.status != '0'
+        run: exit 1
+
+      - name: Set up the locked JS toolchain
+        if: steps.merge.outputs.uptodate != 'true'
+        uses: ./.github/actions/setup-pm
+        with:
+          toolchain: node
+
+      - name: Install workspace dependencies
+        if: steps.merge.outputs.uptodate != 'true'
+        run: pnpm install --frozen-lockfile
+
+      - name: Desktop typecheck and lint
+        if: steps.merge.outputs.uptodate != 'true'
+        working-directory: apps/desktop
+        env:
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: |
+          pnpm run typecheck
+          pnpm run lint
+
+      - name: Desktop UI tests (upstream + Corta brand contracts)
+        if: steps.merge.outputs.uptodate != 'true'
+        working-directory: apps/desktop
+        env:
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: pnpm exec vitest run --project ui
+
+      - name: Corta identity contracts
+        if: steps.merge.outputs.uptodate != 'true'
+        working-directory: apps/desktop
+        run: pnpm exec vitest run --project electron electron/product-identity-brand.test.ts electron/product-identity.test.ts
+
+      - name: Build Corta Desktop Remote (no installer, no publish)
+        if: steps.merge.outputs.uptodate != 'true'
+        working-directory: apps/desktop
+        env:
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: pnpm run build:corta
+
+      - name: Push the sync branch (never main)
+        if: steps.merge.outputs.uptodate != 'true'
+        env:
+          BRANCH: ${{ steps.merge.outputs.branch }}
+        run: |
+          case "$BRANCH" in corta/sync/*) ;; *) echo "::error::refusing to push $BRANCH"; exit 1 ;; esac
+          git push origin "HEAD:refs/heads/$BRANCH"
+
+      - name: Open a review PR (opt-in)
+        if: steps.merge.outputs.uptodate != 'true' && vars.CORTA_SYNC_OPEN_PR == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ steps.merge.outputs.branch }}
+        run: |
+          gh pr create --base "$CORTA_BRANCH" --head "$BRANCH" \
+            --title "Sync upstream Hermes Agent ($(date -u +%Y-%m-%d))" \
+            --body-file "$REPORT_FILE" || echo "::warning::PR not opened (it may already exist)."

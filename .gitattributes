@@ -37,3 +37,11 @@ docker/entrypoint.sh text eol=lf
 *.html  text eol=lf
 *.svg   text eol=lf
 *.ps1   text eol=crlf
+
+# CORTA CUSTOMIZATION — files Corta owns outright. On an upstream merge where
+# BOTH sides changed one of these, keep Corta's version (needs the driver:
+# `git config merge.ours.driver true`, set by corta/scripts/sync-upstream.sh).
+# A file only upstream changed still merges normally. See corta/docs/UPSTREAM_SYNC.md.
+README.md merge=ours
+apps/desktop/assets/icon* merge=ours
+apps/desktop/assets/appx/** merge=ours

@@ -1619,8 +1619,9 @@ export interface DesktopBootstrapUnsupportedPlatform {
 export interface DesktopBootstrapSetupChoice {
   platform: string
   activeRoot: string
-  /** What the local card represents: 'none' = installer offer; the rest = use existing. */
-  local: 'none' | 'installed' | 'bundled'
+  /** What the local card represents: 'none' = installer offer; the rest = use existing.
+   *  CORTA CUSTOMIZATION: 'remote-only' = the Light client — no local card at all. */
+  local: 'none' | 'installed' | 'bundled' | 'remote-only'
   /** This artifact is a bundled install (payload ships in-app). */
   bundled: boolean
 }

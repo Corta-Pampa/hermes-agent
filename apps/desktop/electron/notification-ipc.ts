@@ -1,5 +1,6 @@
 import { BrowserWindow, ipcMain, Notification } from 'electron'
 
+import { BRAND_NAME } from './brand-name' // CORTA CUSTOMIZATION
 import { createEventDeduper } from './event-dedupe'
 import { resolveNotificationAction } from './notification-actions'
 import { createLinuxNotifications } from './notification-linux'
@@ -61,7 +62,7 @@ export function registerNativeNotifications({
     const icon = typeof payload?.icon === 'string' && payload.icon.trim() ? payload.icon.trim() : undefined
 
     const options = {
-      title: payload?.title || 'Hermes',
+      title: payload?.title || BRAND_NAME,
       body: payload?.body || '',
       silent: Boolean(payload?.silent),
       ...(icon ? { icon } : {}),
