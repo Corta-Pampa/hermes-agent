@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 # CORTA CUSTOMIZATION
-"""Render every icon the Corta desktop app ships from corta/brand/logo/corta-icon.svg.
+"""Render every icon the Corta desktop app and web interface ship from corta/brand/logo/corta-icon.svg.
 
 Upstream's scripts/generate_icons.py draws the Hermes/Nous set from the girl art and
 also feeds the website, dashboard and bootstrap installer. This script only rewrites
 the apps/desktop files a Corta installer packages (the paths listed in
-corta/brand/upstream-brand-assets.json, kept `merge=ours` in .gitattributes), reusing
+corta/brand/upstream-brand-assets.json) and the web interface's favicon, all kept
+`merge=ours` in .gitattributes, reusing
 upstream's renderer, platform geometry and MSIX catalog, so the platform rules
 (macOS grid, Icon Composer layers, Windows qualifiers) stay upstream's.
 
@@ -144,6 +145,9 @@ def targets() -> dict[str, bytes]:
         # Upstream's mark paths stay valid for any surface still naming them.
         "apps/desktop/public/nous-girl.png": png(MASTER, 256),
         "apps/desktop/public/nous-girl-dark.png": png(MASTER, 256),
+        # The web interface Corta deploys to clients (web/, corta/docs/WEB.md): its tab icon,
+        # at upstream's favicon sizes (scripts/generate_icons.py checks them).
+        "web/public/favicon.ico": ico(MASTER, [16, 32, 48]),
     }
     for rel, kind, arg in up.APPX_TARGETS:
         out[rel] = wide(*arg) if kind == "wide" else png(MASTER, arg)

@@ -45,3 +45,5 @@ docker/entrypoint.sh text eol=lf
 README.md merge=ours
 apps/desktop/assets/icon* merge=ours
 apps/desktop/assets/appx/** merge=ours
+# CORTA CUSTOMIZATION: the web interface's Corta tab icon (corta/scripts/generate-icons.py).
+web/public/favicon.ico merge=ours

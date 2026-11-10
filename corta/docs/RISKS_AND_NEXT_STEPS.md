@@ -54,8 +54,12 @@ Risques **non textuels** (une fusion propre peut les réintroduire sans conflit 
       le masquer dans la distribution Corta si Corta ne le supporte pas.
 - [x] Onboarding fournisseurs : la ligne « Nous Portal » n'affiche plus l'icône de l'app hors marque
       Hermes (elle porterait l'icône Corta).
-- [ ] Contenus Nous visibles côté serveur (tableau de bord web, site, catalogue de plugins) : hors
-      périmètre Desktop.
+- [x] Tableau de bord web : interface Corta (chat, agents, compétences, automatisations), voir `WEB.md`.
+- [ ] Page de connexion du tableau de bord web (`hermes_cli/dashboard_auth/login_page.py`) : marque
+      upstream, en anglais. En attendant, authentifier par un proxy inverse (voir `WEB.md`).
+- [ ] Identité de l'assistant côté serveur : `corta/deploy/SOUL.md` à installer sur chaque serveur client,
+      compétence `hermes-agent` à désactiver (voir `WEB.md`).
+- [ ] Site et catalogue de plugins : hors périmètre.
 - [ ] Mascottes/« pets », animations et fonds (`ds-assets`, `hermes-sprite.png`) : vérifier qu'aucun ne
       porte l'identité Nous dans les écrans clients ; le fond `Backdrop` est désactivable.
 - [ ] Translucidité/vibrance macOS (effet « verre ») : réglage d'apparence utilisateur, non piloté par le

@@ -1,0 +1,260 @@
+/* CORTA CUSTOMIZATION
+   The Corta interface's own stylesheet: a separate Tailwind build scanning
+   src/corta only, so neither the upstream design system nor the upstream
+   dashboard theme reaches it. Palette = Corta Desktop's CORTA_TOKENS
+   (apps/desktop/src/branding/corta-theme.ts): ink #0A0A16, paper #E7EDF7,
+   mint #6FBF98, every other slot a mix of the three. Mint never carries text
+   in light mode (1.9:1 on paper); in dark mode it is the accent and focus ring. */
+
+@import "tailwindcss" source(none);
+@source "./";
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+:root {
+  color-scheme: light;
+  --c-background: #e7edf7;
+  --c-foreground: #0a0a16;
+  --c-card: #f2f5fb;
+  --c-muted: #dce2ec;
+  --c-muted-foreground: #5a5c67;
+  --c-popover: #f5f8fc;
+  --c-primary: #0a0a16;
+  --c-primary-foreground: #e7edf7;
+  --c-secondary: #cde3e2;
+  --c-accent: #d8dde7;
+  --c-border: #c6cbd5;
+  --c-input: #f5f8fc;
+  --c-ring: #0a0a16;
+  --c-brand: #0a0a16;
+  --c-mint: #6fbf98;
+  --c-sidebar: #dfe5ef;
+  --c-user-bubble: #cfe4e4;
+  --c-user-bubble-border: #b1d8cc;
+  --c-destructive: #cf222e;
+  --c-success: #1a7f37;
+  --c-warning: #9a6700;
+  --c-overlay: rgb(10 10 22 / 0.45);
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --c-background: #0a0a16;
+  --c-foreground: #e7edf7;
+  --c-card: #12121e;
+  --c-muted: #191a26;
+  --c-muted-foreground: #8f929d;
+  --c-popover: #171824;
+  --c-primary: #e7edf7;
+  --c-primary-foreground: #0a0a16;
+  --c-secondary: #1c2b2d;
+  --c-accent: #1e1e2a;
+  --c-border: #2d2e3a;
+  --c-input: #080810;
+  --c-ring: #6fbf98;
+  --c-brand: #6fbf98;
+  --c-mint: #6fbf98;
+  --c-sidebar: #07070f;
+  --c-user-bubble: #172227;
+  --c-user-bubble-border: #2a4440;
+  --c-destructive: #f85149;
+  --c-success: #3fb950;
+  --c-warning: #d29922;
+  --c-overlay: rgb(0 0 0 / 0.6);
+}
+
+@theme inline {
+  --color-background: var(--c-background);
+  --color-foreground: var(--c-foreground);
+  --color-card: var(--c-card);
+  --color-muted: var(--c-muted);
+  --color-muted-foreground: var(--c-muted-foreground);
+  --color-popover: var(--c-popover);
+  --color-primary: var(--c-primary);
+  --color-primary-foreground: var(--c-primary-foreground);
+  --color-secondary: var(--c-secondary);
+  --color-accent: var(--c-accent);
+  --color-border: var(--c-border);
+  --color-input: var(--c-input);
+  --color-ring: var(--c-ring);
+  --color-brand: var(--c-brand);
+  --color-mint: var(--c-mint);
+  --color-sidebar: var(--c-sidebar);
+  --color-user-bubble: var(--c-user-bubble);
+  --color-user-bubble-border: var(--c-user-bubble-border);
+  --color-destructive: var(--c-destructive);
+  --color-success: var(--c-success);
+  --color-warning: var(--c-warning);
+  --color-overlay: var(--c-overlay);
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+}
+
+/* Base rules live in the base layer so utility classes (focus-visible:outline-none…) win. */
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  html {
+    font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    margin: 0;
+    background: var(--c-background);
+    color: var(--c-foreground);
+    font-family: var(--font-sans);
+    line-height: 1.55;
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--c-mint) 45%, transparent);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--c-ring);
+    outline-offset: 2px;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--c-foreground) 22%, transparent) transparent;
+  }
+}
+
+/* Assistant replies (markdown.tsx). */
+.corta-prose {
+  overflow-wrap: anywhere;
+}
+.corta-prose > * + * {
+  margin-top: 0.75em;
+}
+.corta-prose h1,
+.corta-prose h2,
+.corta-prose h3,
+.corta-prose h4 {
+  font-weight: 650;
+  line-height: 1.3;
+  margin-top: 1.1em;
+}
+.corta-prose h1 {
+  font-size: 1.3em;
+}
+.corta-prose h2 {
+  font-size: 1.15em;
+}
+.corta-prose h3,
+.corta-prose h4 {
+  font-size: 1.02em;
+}
+.corta-prose ul,
+.corta-prose ol {
+  padding-left: 1.4em;
+}
+.corta-prose ul {
+  list-style: disc;
+}
+.corta-prose ol {
+  list-style: decimal;
+}
+.corta-prose li + li {
+  margin-top: 0.25em;
+}
+.corta-prose a {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.corta-prose code {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  background: var(--c-muted);
+  border-radius: 4px;
+  padding: 0.1em 0.35em;
+}
+.corta-prose pre {
+  background: var(--c-muted);
+  border: 1px solid var(--c-border);
+  border-radius: 8px;
+  padding: 0.75em 1em;
+  overflow-x: auto;
+}
+.corta-prose pre code {
+  background: none;
+  padding: 0;
+}
+.corta-prose blockquote {
+  border-left: 3px solid var(--c-border);
+  padding-left: 0.9em;
+  color: var(--c-muted-foreground);
+}
+.corta-prose hr {
+  border: 0;
+  border-top: 1px solid var(--c-border);
+}
+.corta-prose .corta-table {
+  overflow-x: auto;
+}
+.corta-prose table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.93em;
+}
+.corta-prose th,
+.corta-prose td {
+  border: 1px solid var(--c-border);
+  padding: 0.4em 0.65em;
+  text-align: left;
+  vertical-align: top;
+}
+.corta-prose th {
+  background: var(--c-muted);
+  font-weight: 600;
+}
+
+@keyframes corta-caret {
+  50% {
+    opacity: 0;
+  }
+}
+.corta-caret {
+  display: inline-block;
+  width: 0.5em;
+  height: 1em;
+  margin-left: 2px;
+  vertical-align: -0.15em;
+  background: currentColor;
+  opacity: 0.55;
+  animation: corta-caret 1s step-end infinite;
+}
+
+@keyframes corta-dot {
+  0%,
+  80%,
+  100% {
+    opacity: 0.25;
+  }
+  40% {
+    opacity: 1;
+  }
+}
+.corta-dots span {
+  animation: corta-dot 1.2s infinite ease-in-out;
+}
+.corta-dots span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.corta-dots span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .corta-caret,
+  .corta-dots span {
+    animation: none;
+  }
+}

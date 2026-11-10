@@ -36,8 +36,8 @@ synchronisation upstream qui touche ces fichiers :
 ```
 
 `scripts/ci/check_icons.sh` (contrôle CI des icônes) l'exécute après le générateur upstream : les icônes
-Corta commitées sont donc celles attendues par la CI. Le site, le tableau de bord web et l'installateur
-bootstrap gardent les icônes upstream (hors installateur Corta).
+Corta commitées sont donc celles attendues par la CI. Il écrit aussi le favicon de l'interface web Corta
+(`web/public/favicon.ico`, voir `WEB.md`). Le site et l'installateur bootstrap gardent les icônes upstream.
 
 ## 3. Logo dans l'application — fourni
 
