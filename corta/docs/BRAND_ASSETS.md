@@ -1,11 +1,10 @@
-# Ressources de marque Corta à fournir
+# Ressources de marque Corta
 
-Aucune ressource de marque Corta n'existait dans le dépôt. Conformément à la consigne, **rien n'a été
-inventé** : pas de logo, pas de couleur, pas de typographie. Ce document liste précisément ce qu'il
-faut fournir et où le déposer. Tant que ce n'est pas fait, `pnpm run corta:check-brand` échoue et les
-commandes `dist:corta:*` refusent de produire un installateur client.
+Ce document liste les ressources de marque, où elles vivent et ce qui reste à fournir. Logo, icônes et
+couleurs sont en place : `pnpm run corta:check-brand` passe. Restent facultatifs : la typographie
+(§6) et le fond du DMG (§4).
 
-## 1. Pictogramme / logo (sources vectorielles) — logotype fourni (`corta/brand/logo/`), reste à décliner en icônes
+## 1. Pictogramme / logo (sources vectorielles) — fournis (`corta/brand/logo/`)
 
 | Ressource | Format | Usage |
 |---|---|---|
@@ -15,22 +14,30 @@ commandes `dist:corta:*` refusent de produire un installateur client.
 | Logotype « Corta » (si différent du pictogramme) | SVG | Futur écran About / onboarding |
 | Règles : zone de protection, taille minimale, fond de tuile (clair/sombre) | PDF ou spécification | Composition des tuiles d'icône |
 
-## 2. Icônes applicatives (générées à partir du §1)
+## 2. Icônes applicatives — générées
 
-Le générateur upstream `scripts/generate_icons.py` produit tout le jeu depuis deux SVG et des fonds de
-tuile. Procédure : remplacer les sources SVG de la marque par celles de Corta (et les fonds de tuile
-`assets/backgrounds/*` si la charte l'exige), lancer `node scripts/generate-icons.mjs`, vérifier avec
-`--check`, puis committer. Les sources upstream sont `assets/nous-girl-black.svg` et
-`assets/nous-girl-white.svg` (racine du dépôt). Attention : le générateur réécrit aussi les icônes du
-site, du tableau de bord web (servi par le serveur Corta) et de l'installateur bootstrap ; relire
-`git status` et ne committer que ce qui doit porter la marque Corta. Fichiers régénérés (empreintes Hermes listées dans
-`corta/brand/upstream-brand-assets.json`) :
+Source : `corta/brand/logo/corta-icon.svg` (icône Corta 195×195). `corta/scripts/generate-icons.py`
+produit toutes les icônes que l'installateur Corta embarque, aux chemins upstream (`merge=ours` dans
+`.gitattributes`) : l'icône Corta sur une tuile encre `#0A0A16`, identique en clair et en sombre.
 
-- macOS : `apps/desktop/assets/icon.icns`, `icon-dark.icns`, `icon-mac.png`, `icon.icon/` (Icon Composer, macOS 26)
+- macOS : `apps/desktop/assets/icon.icns`, `icon-dark.icns`, `icon-mac.png`, `icon.icon/` (macOS 26, avec
+  la couche monochrome Clear/Tinted), `packaging/dmg-volume.icns` (volume du DMG)
 - Windows : `apps/desktop/assets/icon.ico`, `icon-dark.ico`, `assets/appx/*` (tuiles MSIX, toutes échelles)
-- Commun : `apps/desktop/assets/icon.png`, `icon-dark.png`
+- Commun : `apps/desktop/assets/icon.png`, `icon-dark.png`, `public/apple-touch-icon.png`,
+  `public/nous-girl*.png` (anciens chemins du pictogramme, gardés valides)
 
-Ces chemins sont en `merge=ours` dans `.gitattributes` : une fusion upstream ne les écrase pas.
+Le générateur réutilise le moteur de rendu et la géométrie de plateforme du générateur upstream
+(`scripts/generate_icons.py`) sans le modifier. Régénérer après un changement d'icône ou une
+synchronisation upstream qui touche ces fichiers :
+
+```
+<python du runtime Hermes> -I corta/scripts/generate-icons.py          # écrit
+<python du runtime Hermes> -I corta/scripts/generate-icons.py --check  # vérifie
+```
+
+`scripts/ci/check_icons.sh` (contrôle CI des icônes) l'exécute après le générateur upstream : les icônes
+Corta commitées sont donc celles attendues par la CI. Le site, le tableau de bord web et l'installateur
+bootstrap gardent les icônes upstream (hors installateur Corta).
 
 ## 3. Logo dans l'application — fourni
 

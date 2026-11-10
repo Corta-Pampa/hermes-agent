@@ -1,3 +1,4 @@
+import { BRAND } from '@/branding/brand'
 import { RowButton } from '@/components/ui/row-button'
 import { useI18n } from '@/i18n'
 import { Check, ChevronRight, Terminal } from '@/lib/icons'
@@ -45,7 +46,11 @@ export function FeaturedProviderRow({
       <span aria-hidden className="arc-border arc-reverse arc-nous" />
       <div className="min-w-0">
         <div className="flex items-center gap-2">
-          <img alt="" className="size-5 shrink-0 rounded" src={assetPath('apple-touch-icon.png')} />
+          {/* CORTA CUSTOMIZATION: the app icon is the product's, not Nous Portal's,
+              outside the upstream brand. */}
+          {BRAND.id === 'hermes' && (
+            <img alt="" className="size-5 shrink-0 rounded" src={assetPath('apple-touch-icon.png')} />
+          )}
           <span className="text-[length:var(--conversation-text-font-size)] font-semibold">
             {freeTier ? t.freeTier.providerRowTitle : providerTitle(provider)}
           </span>

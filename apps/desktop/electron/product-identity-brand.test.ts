@@ -89,7 +89,8 @@ test('Corta packaging publishes to updates.corta.fr, never GitHub, with no Nous 
   ])
   assert.equal(config.extraMetadata.productName, 'Corta')
   assert.equal(config.dmg.background, undefined)
-  assert.equal(config.dmg.icon, undefined)
+  // Same path as upstream; its pixels are Corta's (corta/scripts/check-brand-assets.mjs).
+  assert.equal(config.dmg.icon, 'packaging/dmg-volume.icns')
   assert.doesNotMatch(JSON.stringify([config.msix, config.linux, config.dmg]), /Nous/)
 })
 

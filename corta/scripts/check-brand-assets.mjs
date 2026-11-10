@@ -26,8 +26,16 @@ const findings = []
 // Not blocking: a neutral default is not another brand's identity.
 const warnings = []
 
+// Hermes-only installer artwork Corta's build never references (its DMG names its own).
+const notShipped = new Set(
+  ['background', 'icon']
+    .map(key => BRANDS.hermes.dmg[key])
+    .filter(path => path && !Object.values(corta.dmg).includes(path))
+    .map(path => `apps/desktop/${path}`)
+)
+
 for (const [file, upstreamId] of Object.entries(manifest.assets)) {
-  if (existsSync(join(root, file)) && blobId(file) === upstreamId) {
+  if (!notShipped.has(file) && existsSync(join(root, file)) && blobId(file) === upstreamId) {
     findings.push(`still the Hermes/Nous asset: ${file}`)
   }
 }

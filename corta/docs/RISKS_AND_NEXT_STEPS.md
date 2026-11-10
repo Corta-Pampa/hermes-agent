@@ -32,8 +32,8 @@ Risques **non textuels** (une fusion propre peut les réintroduire sans conflit 
 
 **Bloquants avant distribution client**
 
-- [ ] Ressources de marque Corta (logo, icônes, couleurs, typographie) — voir `BRAND_ASSETS.md`.
-      La garde `corta:check-brand` bloque les installateurs tant que ce n'est pas fait.
+- [x] Logo, icônes applicatives et couleurs Corta en place ; `corta:check-brand` passe.
+- [ ] Typographie Corta et fond de DMG (facultatif) — voir `BRAND_ASSETS.md`.
 - [ ] Certificats : Apple Developer ID + notarisation ; certificat de signature Windows (sujet →
       `CORTA_MSIX_PUBLISHER`). Aucun n'est configuré (pas d'autorisation).
 - [ ] Hébergement `updates.corta.fr` (HTTPS, types MIME) et procédure d'upload — non créé.
@@ -52,8 +52,8 @@ Risques **non textuels** (une fusion propre peut les réintroduire sans conflit 
 - [ ] Packs de langue livrés par le backend (`.desktop.yaml`) et plugins tiers : non réécrits.
 - [ ] Mode de connexion « Hermes Cloud » (service Nous) : toujours proposé dans Réglages → Gateways ;
       le masquer dans la distribution Corta si Corta ne le supporte pas.
-- [ ] Onboarding fournisseurs : la ligne « Nous Portal » utilise `apple-touch-icon.png` (icône Hermes)
-      — à revoir quand l'icône sera remplacée (sinon le fournisseur Nous portera l'icône Corta).
+- [x] Onboarding fournisseurs : la ligne « Nous Portal » n'affiche plus l'icône de l'app hors marque
+      Hermes (elle porterait l'icône Corta).
 - [ ] Contenus Nous visibles côté serveur (tableau de bord web, site, catalogue de plugins) : hors
       périmètre Desktop.
 - [ ] Mascottes/« pets », animations et fonds (`ds-assets`, `hermes-sprite.png`) : vérifier qu'aucun ne

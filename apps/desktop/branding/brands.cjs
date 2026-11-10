@@ -94,9 +94,10 @@ const BRANDS = {
       lightSynopsis: 'Corta remote desktop client.'
     },
     macCategory: 'public.app-category.business',
-    // No Corta installer artwork exists yet (corta/docs/BRAND_ASSETS.md):
-    // null keeps electron-builder's neutral defaults instead of Nous artwork.
-    dmg: { title: null, background: null, icon: null },
+    // The volume icon is Corta's (corta/scripts/generate-icons.py rewrites
+    // dmg-volume.icns). No Corta DMG background exists yet: null keeps
+    // electron-builder's neutral default instead of the Nous artwork.
+    dmg: { title: null, background: null, icon: 'packaging/dmg-volume.icns' },
     // The Corta-controlled update origin. CLOUDFLARE_R2_PUBLIC_URL (CI) still
     // wins when set; GitHub releases are never used as a Corta feed.
     updates: { feedBaseUrl: 'https://updates.corta.fr', allowGithubFallback: false },
