@@ -8,12 +8,21 @@
 #      sync branch, and (opt-in) open a PR into main for human review
 #
 # It never pushes to main, never force-pushes, never resolves a conflict, never
-# builds an installer, never uploads a release, and uses no secret beyond the
-# workflow's own GITHUB_TOKEN. See corta/docs/UPSTREAM_SYNC.md.
+# builds an installer and never uploads a release. See corta/docs/UPSTREAM_SYNC.md.
 #
-# Opt-ins (Settings → Secrets and variables → Actions → Variables):
-#   CORTA_SYNC_OPEN_PR=true   open a PR for a clean sync branch (needs "Allow
-#                             GitHub Actions to create and approve pull requests")
+# GitHub refuses any push from GITHUB_TOKEN that touches .github/workflows/, and
+# upstream changes its workflows often. So when the merge brings workflow changes,
+# the branch can only be pushed with CORTA_SYNC_TOKEN; without it the job fails
+# right after the merge (before the builds) and says to push it locally.
+#
+# Opt-ins (Settings → Secrets and variables → Actions):
+#   Variable CORTA_SYNC_OPEN_PR=true  open a PR for a clean sync branch (needs
+#                                     "Allow GitHub Actions to create and approve
+#                                     pull requests")
+#   Secret   CORTA_SYNC_TOKEN         fine-grained PAT on this repo only, with
+#                                     Contents + Workflows: read and write. Used
+#                                     for the final push only, never exposed to
+#                                     the install/build steps.
 name: Corta upstream sync
 
 on:
@@ -87,6 +96,29 @@ jobs:
         if: steps.merge.outputs.status != '0'
         run: exit 1
 
+      - name: Can this branch be pushed? (upstream workflow changes)
+        if: steps.merge.outputs.uptodate != 'true'
+        env:
+          HAS_SYNC_TOKEN: ${{ secrets.CORTA_SYNC_TOKEN != '' }}
+          BRANCH: ${{ steps.merge.outputs.branch }}
+        run: |
+          changed="$(git diff --name-only "origin/$CORTA_BRANCH" HEAD -- .github/workflows)"
+          [ -n "$changed" ] || exit 0
+          {
+            echo ""
+            echo "## Upstream changes GitHub workflow files"
+            printf '%s\n' "$changed" | sed 's/^/- `/;s/$/`/'
+          } >> "$GITHUB_STEP_SUMMARY"
+          [ "$HAS_SYNC_TOKEN" = "true" ] && exit 0
+          {
+            echo ""
+            echo "GITHUB_TOKEN cannot push workflow changes and the \`CORTA_SYNC_TOKEN\` secret is not set."
+            echo "Either add that secret (fine-grained PAT, this repo, Contents + Workflows: read and write) and re-run,"
+            echo "or push this sync locally: \`SYNC_BRANCH=$BRANCH bash corta/scripts/sync-upstream.sh\`, run the checks, then \`git push origin $BRANCH\`."
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "::error::Upstream changes .github/workflows/ and CORTA_SYNC_TOKEN is not set: GITHUB_TOKEN cannot push this branch. See the job summary."
+          exit 1
+
       - name: Set up the locked JS toolchain
         if: steps.merge.outputs.uptodate != 'true'
         uses: ./.github/actions/setup-pm
@@ -129,9 +161,16 @@ jobs:
         if: steps.merge.outputs.uptodate != 'true'
         env:
           BRANCH: ${{ steps.merge.outputs.branch }}
+          SYNC_TOKEN: ${{ secrets.CORTA_SYNC_TOKEN }}
         run: |
           case "$BRANCH" in corta/sync/*) ;; *) echo "::error::refusing to push $BRANCH"; exit 1 ;; esac
-          git push origin "HEAD:refs/heads/$BRANCH"
+          if [ -z "$SYNC_TOKEN" ]; then
+            git push origin "HEAD:refs/heads/$BRANCH"
+            exit 0
+          fi
+          # The empty extraheader drops checkout's GITHUB_TOKEN header, so the PAT authenticates.
+          git -c http.https://github.com/.extraheader= push \
+            "https://x-access-token:${SYNC_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:refs/heads/$BRANCH"
 
       - name: Open a review PR (opt-in)
         if: steps.merge.outputs.uptodate != 'true' && vars.CORTA_SYNC_OPEN_PR == 'true'

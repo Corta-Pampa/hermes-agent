@@ -99,7 +99,22 @@ rapport (commits, nouveaux tags de release, points de contact modifiés des deux
 job et en artefact ; fusion dans `corta/sync/upstream-<date>` ; si conflit : échec rouge, **rien n'est
 poussé** ; si fusion propre : typecheck, lint, tests UI, contrats d'identité, build Corta Light, puis push
 de la branche de sync (jamais `main`) et, si `CORTA_SYNC_OPEN_PR=true`, ouverture d'une PR. Aucun build
-d'installateur, aucune publication, aucun secret autre que `GITHUB_TOKEN`.
+d'installateur, aucune publication.
+
+**Fusions qui touchent `.github/workflows/`.** GitHub refuse tout push du `GITHUB_TOKEN` qui crée ou
+modifie un workflow (`refusing to allow a GitHub App to create or update workflow … without workflows
+permission`), et cette permission ne peut pas lui être accordée. Upstream modifie souvent ses workflows,
+donc :
+
+- avec le secret `CORTA_SYNC_TOKEN` (fine-grained PAT limité à ce dépôt, permissions **Contents** et
+  **Workflows** en lecture/écriture), le job pousse la branche de sync avec ce token. Le token n'est
+  exposé qu'à l'étape de push, jamais aux étapes d'installation et de build qui exécutent du code upstream ;
+- sans ce secret, le job échoue juste après la fusion (avant les builds), liste les workflows modifiés
+  dans le résumé, et la sync se pousse en local : `bash corta/scripts/sync-upstream.sh`, les
+  vérifications ci-dessus, puis `git push origin corta/sync/upstream-<date>`.
+
+Une branche poussée avec le PAT déclenche les workflows `push` du fork (pas celle poussée avec
+`GITHUB_TOKEN`) : d'où l'intérêt de désactiver les workflows upstream (ci-dessous).
 
 Les workflows upstream (46) arrivent aussi dans le fork. Ils tournent sur des runners `blacksmith-*` et
 utilisent des secrets Nous : **les désactiver dans l'interface GitHub** (Actions → workflow → Disable),
