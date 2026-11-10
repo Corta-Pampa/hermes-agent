@@ -26,3 +26,22 @@ export function BrandMark({ className, ...props }: React.ComponentProps<'span'>)
     </span>
   )
 }
+
+// CORTA CUSTOMIZATION: the brand's logotype, theme-aware like the mark. Renders
+// nothing for a brand without one (upstream keeps its "HERMES AGENT" lettering).
+export function BrandLogo({ className, ...props }: React.ComponentProps<'img'>) {
+  const { renderedMode } = useTheme()
+
+  if (!BRAND.logo) {
+    return null
+  }
+
+  return (
+    <img
+      alt={BRAND.productName}
+      className={cn('mx-auto block h-auto', className)}
+      src={assetPath(renderedMode === 'dark' ? BRAND.logo.dark : BRAND.logo.light)}
+      {...props}
+    />
+  )
+}

@@ -5,7 +5,7 @@ inventé** : pas de logo, pas de couleur, pas de typographie. Ce document liste 
 faut fournir et où le déposer. Tant que ce n'est pas fait, `pnpm run corta:check-brand` échoue et les
 commandes `dist:corta:*` refusent de produire un installateur client.
 
-## 1. Pictogramme / logo (sources vectorielles)
+## 1. Pictogramme / logo (sources vectorielles) — logotype fourni (`corta/brand/logo/`), reste à décliner en icônes
 
 | Ressource | Format | Usage |
 |---|---|---|
@@ -32,15 +32,17 @@ site, du tableau de bord web (servi par le serveur Corta) et de l'installateur b
 
 Ces chemins sont en `merge=ours` dans `.gitattributes` : une fusion upstream ne les écrase pas.
 
-## 3. Pictogramme dans l'application
+## 3. Logo dans l'application — fourni
 
-| Fichier à déposer | Spécification |
+Sources Corta : `corta/brand/logo/logo-dark.svg` (logotype) et `logo-dark-short.svg` (version courte).
+Servis depuis `apps/desktop/public/corta/` et déclarés dans `brands.cjs` (`renderer.mark`, `renderer.logo`) :
+
+| Fichier | Usage |
 |---|---|
-| `apps/desktop/public/corta/brand-mark.png` | Pictogramme sur tuile, mode clair, 512×512, PNG transparent |
-| `apps/desktop/public/corta/brand-mark-dark.png` | Idem, mode sombre |
+| `mark-dark.svg` / `logo-dark.svg` | Mode sombre : fichiers Corta tels quels |
+| `mark.svg` / `logo.svg` | Mode clair : mêmes tracés, encre et papier inversés (le badge papier disparaîtrait sur le fond `#E7EDF7`) |
 
-Puis dans `apps/desktop/branding/brands.cjs` :
-`renderer.mark: { light: 'corta/brand-mark.png', dark: 'corta/brand-mark-dark.png' }`.
+Si Corta dispose d'une version claire officielle, remplacer `mark.svg` / `logo.svg`.
 
 ## 4. Installateur macOS (DMG) — facultatif
 
@@ -51,7 +53,7 @@ Puis dans `apps/desktop/branding/brands.cjs` :
 
 Puis `dmg.background` / `dmg.icon` dans `brands.cjs`. Sans eux : fond neutre par défaut d'electron-builder.
 
-## 5. Jetons de couleur (thème Corta)
+## 5. Jetons de couleur (thème Corta) — fournis (encre, papier, menthe ; voir `BRANDING.md`)
 
 À fournir pour le mode **clair** et le mode **sombre**, en hexadécimal, avec contrastes AA vérifiés
 (texte ≥ 4,5:1) : à saisir dans `CORTA_TOKENS` (`apps/desktop/src/branding/corta-theme.ts`).

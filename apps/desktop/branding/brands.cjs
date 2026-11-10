@@ -53,6 +53,7 @@ const BRANDS = {
       id: 'hermes',
       productName: 'Hermes',
       mark: { light: 'nous-girl.png', dark: 'nous-girl-dark.png' },
+      logo: null,
       defaultSkin: null,
       builtinSkins: null,
       rewriteCopy: false,
@@ -102,9 +103,11 @@ const BRANDS = {
     renderer: {
       id: 'corta',
       productName: 'Corta',
-      // No Corta mark has been supplied: render no mark rather than a Hermes
-      // one or an invented one. Drop the files in public/corta/ and set them.
-      mark: null,
+      // Sources: corta/brand/logo/. The dark-mode files are Corta's own
+      // (light badge, ink letters); the light-mode files swap the two brand
+      // colors so the badge does not vanish on the #E7EDF7 background.
+      mark: { light: 'corta/mark.svg', dark: 'corta/mark-dark.svg' },
+      logo: { light: 'corta/logo.svg', dark: 'corta/logo-dark.svg' },
       defaultSkin: 'corta',
       builtinSkins: ['corta'],
       rewriteCopy: true,

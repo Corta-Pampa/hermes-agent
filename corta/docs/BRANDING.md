@@ -36,7 +36,8 @@ Research (MIT License) » (panneau About + métadonnées).
 
 **Interface** : titre de fenêtre et menus natifs (`About Corta`, `Quit Corta`, via `app.setName`),
 textes des 9 langues intégrées, tray, dialogue de fermeture, notification par défaut, fenêtre HUD,
-écran de premier lancement, pictogramme (aucun tant que Corta n'en fournit pas).
+écran de premier lancement, pictogramme Corta (premier lancement, About, mises à jour) et logotype Corta à la
+place du lettrage « HERMES AGENT » d'une conversation vide.
 
 **Ce qui reste volontairement « Hermes »** : « Hermes Agent » (le moteur que le serveur exécute — vrai et
 dû à l'attribution), « Hermes Cloud » (service hébergé de Nous Research), les commandes et liens en
@@ -60,9 +61,12 @@ plugins Bot Mode et Kanban, quelques messages d'erreur). Voir `RISKS_AND_NEXT_ST
   serveur (`/skin`, `display.skin`) ne reteintent pas le client. Un choix enregistré d'un thème non
   proposé n'est pas effacé : il se résout simplement vers `corta`. Restent possibles, par action délibérée :
   mode clair/sombre/système, couleur d'accent, import d'un thème VS Code.
-- **Valeurs** : aucune charte Corta n'existe dans le dépôt ; tant que `CORTA_TOKENS` est vide, chaque
-  emplacement reprend la palette upstream `github` (GitHub Light/Dark Default, neutre et contrastée).
-  Remplir `CORTA_TOKENS` (partiellement si besoin) suffit à appliquer la charte ; rien d'autre à modifier.
+- **Valeurs** : encre `#0A0A16`, papier `#E7EDF7`, menthe `#6FBF98` (accent, avec parcimonie). Les autres
+  emplacements sont des mélanges de ces trois couleurs, texte ≥ 4,5:1 sur chaque surface
+  (`corta-theme-contrast.test.ts`). La menthe n'atteint que 1,9:1 sur le papier : en mode clair elle ne porte
+  jamais de texte ni l'anneau de focus (bulle utilisateur, boutons secondaires, contour du compositeur) ; en
+  mode sombre (9:1 sur l'encre) elle sert d'accent de marque et d'anneau de focus. Non fournis, donc repris du
+  préréglage `github` : rouge d'erreur, palettes ANSI du terminal, typographie (polices système).
 
 Pour assouplir le verrouillage (tous les thèmes intégrés), mettre `builtinSkins: null` dans
 `BRANDS.corta.renderer`.
@@ -73,6 +77,8 @@ Pour assouplir le verrouillage (tous les thèmes intégrés), mettre `builtinSki
    **Ne jamais changer `appIdPrefix`, les `pascal` ou `kebab` d'une variante déjà distribuée** :
    cela crée une autre application pour l'OS (nouveau `userData`, perte apparente des réglages).
 2. Couleurs / typographie : `src/branding/corta-theme.ts` (`CORTA_TOKENS`).
-3. Pictogramme et icônes : voir [`BRAND_ASSETS.md`](BRAND_ASSETS.md).
+3. Logo : sources dans `corta/brand/logo/`, variantes servies dans `apps/desktop/public/corta/` (`mark*` =
+   version courte, `logo*` = version longue ; `*-dark` = fichiers Corta tels quels pour le mode sombre, sans
+   suffixe = les deux couleurs inversées pour le mode clair). Icônes applicatives : voir [`BRAND_ASSETS.md`](BRAND_ASSETS.md).
 4. Vérifier : `pnpm exec vitest run src/branding` et
    `pnpm exec vitest run --project electron electron/product-identity-brand.test.ts`.

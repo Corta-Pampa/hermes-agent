@@ -15,6 +15,9 @@ export interface RendererBrand {
   productName: string
   /** public/ paths of the theme-aware mark; null renders no mark. */
   mark: { light: string; dark: string } | null
+  /** public/ paths of the theme-aware logotype painted on an empty chat in place
+   *  of the upstream "HERMES AGENT" lettering; null keeps the lettering. */
+  logo: { light: string; dark: string } | null
   /** Skin a fresh install paints; null keeps the upstream default. */
   defaultSkin: string | null
   /** Built-in skins offered in the picker; null offers every built-in. */

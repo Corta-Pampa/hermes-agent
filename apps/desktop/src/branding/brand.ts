@@ -14,6 +14,7 @@ export const UPSTREAM_BRAND: RendererBrand = Object.freeze({
   id: 'hermes',
   productName: 'Hermes',
   mark: { light: 'nous-girl.png', dark: 'nous-girl-dark.png' },
+  logo: null,
   defaultSkin: null,
   builtinSkins: null,
   rewriteCopy: false,
